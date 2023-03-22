@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@astrojs/preact": "^1.2.0",
+    "@types/ws": "^8.5.4",
     "astro": "^1.6.10",
     "phaser": "^3.55.2",
-    "preact": "^10.11.3"
+    "preact": "^10.11.3",
+    "ws": "^8.13.0"
   }
 }

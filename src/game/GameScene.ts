@@ -12,8 +12,8 @@ import knightWhite from "/assets/Chess_nlt45.svg";
 import knightBlack from "/assets/Chess_ndt45.svg";
 import pawnWhite from "/assets/Chess_plt45.svg";
 import pawnBlack from "/assets/Chess_pdt45.svg";
-import { initialSetup } from "./Pieces";
-import { BoardPieceObject, boardSides, sideFactor } from "./types";
+import { BoardPieceObject, boardSides } from "./types";
+import type { SocketMessage } from "socketIO/types";
 
 export class GameScene extends Phaser.Scene {
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
@@ -36,22 +36,66 @@ export class GameScene extends Phaser.Scene {
     }
 
     create() {
-        const board = new Board(this, 13, 9, 20, 50, 55);
-        initialSetup.forEach(([pieceName, { q, r }]) =>
-            boardSides.forEach((side) => {
-                const image = this.add.image(
-                    0,
-                    0,
-                    pieceName + side[0]?.toUpperCase() + side.slice(1)
-                ) as BoardPieceObject;
-                image.scale = 0.5;
-                image.setInteractive();
-                this.input.setDraggable(image);
-                board.addPiece(image, pieceName, side, {
-                    q: q * sideFactor[side],
-                    r: r * sideFactor[side],
-                });
-            })
-        );
+        fetch("http://localhost:3000/socket");
+        const socket = new WebSocket("ws://localhost:8080");
+        const board = new Board({
+            scene: this,
+            maxQ: 13,
+            maxR: 9,
+            tileSize: 20,
+            offsetX: 50,
+            offsetY: 55,
+            onMove: (move) => {
+                const socketMessage: SocketMessage = {
+                    type: "move",
+                    data: move,
+                };
+                socket.send(JSON.stringify(socketMessage));
+            },
+        });
+
+        socket.addEventListener("message", (event) => {
+            const message = JSON.parse(event.data) as SocketMessage;
+            switch (message.type) {
+                case "initialSetup":
+                    console.log(message.data.side);
+                    boardSides.forEach((side) =>
+                        message.data.pieces[side].forEach(
+                            ([pieceName, coords]) => {
+                                const image = this.add.image(
+                                    0,
+                                    0,
+                                    pieceName +
+                                        side[0]?.toUpperCase() +
+                                        side.slice(1)
+                                ) as BoardPieceObject;
+                                image.scale = 0.5;
+                                image.setInteractive();
+                                this.input.setDraggable(image);
+                                board.addPiece(
+                                    image,
+                                    pieceName,
+                                    side,
+                                    side === message.data.side,
+                                    coords
+                                );
+                            }
+                        )
+                    );
+                    break;
+                case "move":
+                    board.removePiece(message.data[1].q, message.data[1].r);
+                    board.placePiece(
+                        board.pieces.find(
+                            (piece) =>
+                                piece.q === message.data[0].q &&
+                                piece.r === message.data[0].r
+                        )!,
+                        message.data[1].q,
+                        message.data[1].r
+                    );
+                    break;
+            }
+        });
     }
 }

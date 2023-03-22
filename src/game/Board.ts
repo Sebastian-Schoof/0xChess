@@ -50,6 +50,7 @@ function hexToPixel(size: number, { q, r }: { q: number; r: number }) {
 
 export class Board {
     private scene: Phaser.Scene;
+    private onMove: (move: [BoardCoordinates, BoardCoordinates]) => void;
 
     public fields: Hexagon[][] = [];
     // public defaultFieldColor = 0xaaaaaa;
@@ -61,19 +62,29 @@ export class Board {
     public pieces: BoardPieceObject[] = [];
     public highlightedFields: BoardCoordinates[] = [];
 
-    constructor(
-        scene: Phaser.Scene,
-        maxQ: number,
-        maxR: number,
-        tileSize: number,
-        offsetX: number,
-        offsetY: number
-    ) {
+    constructor({
+        scene,
+        maxQ,
+        maxR,
+        tileSize,
+        offsetX,
+        offsetY,
+        onMove,
+    }: {
+        scene: Phaser.Scene;
+        maxQ: number;
+        maxR: number;
+        tileSize: number;
+        offsetX: number;
+        offsetY: number;
+        onMove: (move: [BoardCoordinates, BoardCoordinates]) => void;
+    }) {
         this.scene = scene;
         this.maxQ = maxQ;
         this.maxR = maxR;
         this.offsetR = Math.floor(maxR / 2);
         this.offsetQ = Math.floor(maxQ / 2) - this.offsetR / 2;
+        this.onMove = onMove;
         for (let r = 0; r < maxR; r++) {
             this.fields[r] = [];
             for (let q = 0; q < maxQ - (r % 2); q++) {
@@ -124,6 +135,7 @@ export class Board {
         piece: BoardPieceObject,
         type: Piece,
         side: BoardSide,
+        active: boolean,
         { q, r }: { q: number; r: number }
     ) {
         piece.q = q;
@@ -133,77 +145,93 @@ export class Board {
 
         this.pieces.push(piece);
 
-        piece
-            .on(
-                Phaser.Input.Events.DRAG,
-                (pointer: Phaser.Input.Pointer, x: number, y: number) => {
-                    piece.x = x;
-                    piece.y = y;
-                }
-            )
-            .on(Phaser.Input.Events.DRAG_START, () => {
-                this.highlightedFields = getLegalMoves(
-                    type,
-                    side,
-                    {
-                        q: piece.q,
-                        r: piece.r,
-                    },
-                    this.pieces.map((piece) => ({
-                        side: piece.side,
-                        piece: piece.piece,
-                        coords: { q: piece.q, r: piece.r },
-                    }))
-                );
-                this.highlightedFields.forEach(({ q, r }) => {
-                    const field = this.getField(q, r);
-                    if (!field) return;
-                    field.fillColor = 0x00ff00;
-                });
-            })
-            .on(Phaser.Input.Events.DRAG_END, () => {
-                this.highlightedFields.forEach(({ q, r }) => {
-                    const field = this.getField(q, r);
-                    if (!field) return;
-                    field.fillColor = field.defaultColor;
-                });
-                this.highlightedFields = [];
-                this.placePiece(piece, piece.q, piece.r);
-            })
-            .on(
-                Phaser.Input.Events.DRAG_ENTER,
-                (pointer: Phaser.Input.Pointer, hexagon: Hexagon) => {
-                    if (piece.q !== hexagon.q || piece.r !== hexagon.r)
-                        hexagon.fillColor = 0x757575;
-                }
-            )
-            .on(
-                Phaser.Input.Events.DRAG_LEAVE,
-                (pointer: Phaser.Input.Pointer, hexagon: Hexagon) => {
-                    hexagon.fillColor = this.highlightedFields.some(
-                        (field) =>
-                            field.q === hexagon.q && field.r === hexagon.r
-                    )
-                        ? 0x00ff00
-                        : hexagon.defaultColor;
-                    hexagon.fillAlpha = 1;
-                }
-            )
-            .on(
-                Phaser.Input.Events.DROP,
-                (pointer: Phaser.Input.Pointer, dropZone: Hexagon) => {
-                    dropZone.fillColor = dropZone.defaultColor;
-                    dropZone.fillAlpha = 1;
-                    if (
-                        this.highlightedFields.some(
-                            (coord) =>
-                                coord.q === dropZone.q && coord.r === dropZone.r
+        if (active) {
+            piece
+                .on(
+                    Phaser.Input.Events.DRAG,
+                    (pointer: Phaser.Input.Pointer, x: number, y: number) => {
+                        piece.x = x;
+                        piece.y = y;
+                    }
+                )
+                .on(Phaser.Input.Events.DRAG_START, () => {
+                    this.highlightedFields = getLegalMoves(
+                        type,
+                        side,
+                        {
+                            q: piece.q,
+                            r: piece.r,
+                        },
+                        this.pieces.map((piece) => ({
+                            side: piece.side,
+                            piece: piece.piece,
+                            coords: { q: piece.q, r: piece.r },
+                        }))
+                    );
+                    this.highlightedFields.forEach(({ q, r }) => {
+                        const field = this.getField(q, r);
+                        if (!field) return;
+                        field.fillColor = 0x00ff00;
+                    });
+                })
+                .on(Phaser.Input.Events.DRAG_END, () => {
+                    this.highlightedFields.forEach(({ q, r }) => {
+                        const field = this.getField(q, r);
+                        if (!field) return;
+                        field.fillColor = field.defaultColor;
+                    });
+                    this.highlightedFields = [];
+                    this.placePiece(piece, piece.q, piece.r);
+                })
+                .on(
+                    Phaser.Input.Events.DRAG_ENTER,
+                    (pointer: Phaser.Input.Pointer, hexagon: Hexagon) => {
+                        if (piece.q !== hexagon.q || piece.r !== hexagon.r)
+                            hexagon.fillColor = 0x757575;
+                    }
+                )
+                .on(
+                    Phaser.Input.Events.DRAG_LEAVE,
+                    (pointer: Phaser.Input.Pointer, hexagon: Hexagon) => {
+                        hexagon.fillColor = this.highlightedFields.some(
+                            (field) =>
+                                field.q === hexagon.q && field.r === hexagon.r
                         )
-                    )
-                        this.placePiece(piece, dropZone.q, dropZone.r);
-                }
-            );
-        this.scene.input.setDraggable(piece);
+                            ? 0x00ff00
+                            : hexagon.defaultColor;
+                        hexagon.fillAlpha = 1;
+                    }
+                )
+                .on(
+                    Phaser.Input.Events.DROP,
+                    (pointer: Phaser.Input.Pointer, dropZone: Hexagon) => {
+                        dropZone.fillColor = dropZone.defaultColor;
+                        dropZone.fillAlpha = 1;
+                        if (
+                            this.highlightedFields.some(
+                                (coord) =>
+                                    coord.q === dropZone.q &&
+                                    coord.r === dropZone.r
+                            )
+                        ) {
+                            this.removePiece(dropZone.q, dropZone.r);
+                            this.onMove([
+                                { q: piece.q, r: piece.r },
+                                { q: dropZone.q, r: dropZone.r },
+                            ]);
+                            this.placePiece(piece, dropZone.q, dropZone.r);
+                        }
+                    }
+                );
+            this.scene.input.setDraggable(piece);
+        }
         this.placePiece(piece, q, r);
+    }
+
+    public removePiece(q: number, r: number) {
+        this.pieces.find((piece) => piece.q === q && piece.r === r)?.destroy();
+        this.pieces = this.pieces.filter(
+            (piece) => !(piece.q === q && piece.r === r)
+        );
     }
 }

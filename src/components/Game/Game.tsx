@@ -33,7 +33,7 @@ export default function Game() {
         updateZoom();
         window.addEventListener("resize", updateZoom);
         return () => window.removeEventListener("resize", updateZoom);
-    });
+    }, []);
 
     return (
         <div

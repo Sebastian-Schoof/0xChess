@@ -4,9 +4,10 @@ import {
     Piece,
     BoardPiece,
     sideFactor,
+    boardSides,
 } from "./types";
 
-export const initialSetup = [
+const initialSetup = [
     ["king", { q: -6, r: 0 }],
     ["queen", { q: -5, r: -1 }],
     ["rook", { q: -4, r: -4 }],
@@ -27,6 +28,25 @@ export const initialSetup = [
     ["pawn", { q: -6, r: 3 }],
     ["pawn", { q: -7, r: 4 }],
 ] as const;
+
+export const initialBoardSetup = Object.fromEntries(
+    boardSides.map(
+        (side) =>
+            [
+                side,
+                initialSetup.map(
+                    ([piece, { q, r }]) =>
+                        [
+                            piece,
+                            {
+                                q: q * sideFactor[side],
+                                r: r * sideFactor[side],
+                            },
+                        ] as const
+                ),
+            ] as const
+    )
+) as { [side in BoardSide]: [Piece, BoardCoordinates][] };
 
 const diagonalDirections = [
     { q: 1, r: -2 },
