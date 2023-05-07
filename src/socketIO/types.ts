@@ -1,5 +1,5 @@
-import type { initialBoardSetup } from "game/Pieces";
-import type { BoardCoordinates, BoardSide } from "game/types";
+import type { initialBoardSetup } from "../game/Pieces";
+import type { BoardCoordinates, BoardSide } from "../game/types";
 
 export type SocketMessage =
     | {

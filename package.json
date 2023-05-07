@@ -1,21 +1,26 @@
 {
-  "name": "@example/basics",
-  "type": "module",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "@astrojs/preact": "^1.2.0",
-    "@types/ws": "^8.5.4",
-    "astro": "^1.6.10",
-    "phaser": "^3.55.2",
-    "preact": "^10.11.3",
-    "ws": "^8.13.0"
-  }
+    "name": "0xChess",
+    "private": true,
+    "version": "0.0.0",
+    "scripts": {
+        "dev": "vite",
+        "serve": "ts-node src/server.ts",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "phaser": "^3.60.0",
+        "preact": "^10.13.1",
+        "ws": "^8.13.0"
+    },
+    "devDependencies": {
+        "@preact/preset-vite": "^2.5.0",
+        "@types/ws": "^8.5.4",
+        "sass": "^1.62.1",
+        "ts-node": "^10.9.1",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "^5.0.2",
+        "vite": "^4.3.2",
+        "vite-tsconfig-paths": "^4.2.0"
+    }
 }

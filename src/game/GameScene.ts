@@ -36,7 +36,6 @@ export class GameScene extends Phaser.Scene {
     }
 
     create() {
-        fetch("http://localhost:3000/socket");
         const socket = new WebSocket("ws://localhost:8080");
         const board = new Board({
             scene: this,
@@ -56,6 +55,7 @@ export class GameScene extends Phaser.Scene {
 
         socket.addEventListener("message", (event) => {
             const message = JSON.parse(event.data) as SocketMessage;
+            //TODO: add move lock while waiting for opponent
             switch (message.type) {
                 case "initialSetup":
                     console.log(message.data.side);

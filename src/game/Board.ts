@@ -1,3 +1,4 @@
+import Phaser from "phaser";
 import { getLegalMoves } from "./Pieces";
 import type {
     BoardCoordinates,
@@ -53,7 +54,7 @@ export class Board {
     private onMove: (move: [BoardCoordinates, BoardCoordinates]) => void;
 
     public fields: Hexagon[][] = [];
-    // public defaultFieldColor = 0xaaaaaa;
+
     public maxQ: number;
     public maxR: number;
     public offsetQ: number;

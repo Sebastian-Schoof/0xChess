@@ -1,3 +1,5 @@
+import Phaser from "phaser";
+
 export type Piece = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
 
 export const boardSides = ["white", "black"] as const;
