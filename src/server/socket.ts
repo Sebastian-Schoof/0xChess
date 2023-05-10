@@ -7,17 +7,20 @@ const games: ({ [side in BoardSide]?: WebSocket } | null)[] = [];
 
 function joinGame(socket: WebSocket) {
     for (let gameId = 0; gameId < games.length; gameId++) {
-        //TODO: catch game being null
+        if (!games[gameId]) continue;
         for (let side of boardSides)
             if (games[gameId]![side] === undefined) {
                 games[gameId]![side] = socket;
                 return [side, gameId] as const;
             }
     }
+
     const side = boardSides[Math.floor(Math.random() * 2)]!;
-    //TODO: reuse null entries before creating new ones
-    const gameId = games.length;
-    games.push({ [side]: socket });
+    let gameId = games.indexOf(null);
+    if (gameId == -1) {
+        gameId = games.length;
+    }
+    games[gameId] = { [side]: socket };
     return [side, gameId] as const;
 }
 
