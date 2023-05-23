@@ -68,6 +68,7 @@ export class Board {
     public highlightedFields: BoardCoordinates[] = [];
 
     public lockMovement = false;
+    public gameOver = false;
 
     constructor({
         scene,
@@ -162,6 +163,7 @@ export class Board {
                     }
                 )
                 .on(Phaser.Input.Events.DRAG_START, () => {
+                    if (this.gameOver) return;
                     this.highlightedFields = getLegalMoves(
                         type,
                         side,
@@ -224,6 +226,13 @@ export class Board {
                         )
                             return;
                         this.lockMovement = true;
+                        const takenPiece = this.pieces.find(
+                            (piece) =>
+                                piece.q === dropZone.q && piece.r === dropZone.r
+                        );
+                        if (takenPiece?.piece === "king") {
+                            this.gameOver = true;
+                        }
                         this.removePiece(dropZone.q, dropZone.r);
                         if (
                             piece.piece == "pawn" &&

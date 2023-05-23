@@ -85,6 +85,14 @@ export class GameScene extends Phaser.Scene {
                     );
                     break;
                 case "move":
+                    const takenPiece = board.pieces.find(
+                        (piece) =>
+                            piece.q === message.data.to.q &&
+                            piece.r === message.data.to.r
+                    );
+                    if (takenPiece?.piece === "king") {
+                        board.gameOver = true;
+                    }
                     board.removePiece(message.data.to.q, message.data.to.r);
                     if (message.data.promotion) {
                         board.removePiece(
