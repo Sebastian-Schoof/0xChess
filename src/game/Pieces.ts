@@ -54,6 +54,11 @@ const diagonalDirections = [
     { q: 1, r: 1 },
 ] as const;
 
+const pawnDiagonals = [
+    { q: 2, r: -1 },
+    { q: 1, r: 1 },
+] as const;
+
 const straightDirections = [
     { q: 1, r: -1 },
     { q: 1, r: 0 },
@@ -111,7 +116,9 @@ const legalMoves: {
     ) => BoardCoordinates[];
 } = {
     king: (coords, side, boardPieces) =>
-        scaleCheck(coords, side, boardPieces, straightDirections, 1),
+        scaleCheck(coords, side, boardPieces, straightDirections, 1).concat(
+            scaleCheck(coords, side, boardPieces, diagonalDirections, 1)
+        ),
     queen: (coords, side, boardPieces) =>
         scaleCheck(coords, side, boardPieces, straightDirections, 12).concat(
             scaleCheck(coords, side, boardPieces, diagonalDirections, 8)
@@ -152,7 +159,22 @@ const legalMoves: {
                 legalFields[idx] = field;
             else break;
         }
-        return legalFields;
+        const takableFields = pawnDiagonals.flatMap(({ q, r }) =>
+            boardPieces.map(
+                ({ coords: otherPieceCoords, side: otherPieceSide }) => {
+                    const targetCoords = {
+                        q: coords.q + q * sideFactor[side],
+                        r: coords.r + r * sideFactor[side],
+                    };
+                    return otherPieceSide !== side &&
+                        otherPieceCoords.q === targetCoords.q &&
+                        otherPieceCoords.r === targetCoords.r
+                        ? targetCoords
+                        : undefined;
+                }
+            )
+        );
+        return legalFields.concat(takableFields).filter(Boolean);
     },
 };
 
