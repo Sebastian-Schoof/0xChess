@@ -1,5 +1,6 @@
 import { BoardSide, Piece } from "game/types";
 import { piecePaths } from "./assets";
+import styles from "./styles.module.css";
 
 const promotionPieces: Piece[] = ["knight", "bishop", "rook", "queen"];
 
@@ -11,18 +12,7 @@ export function PromotionDialog({
     onClick: (piece: Piece) => void;
 }) {
     return (
-        <div
-            style={{
-                border: "1px solid",
-                borderRadius: "50px",
-                display: "flex",
-                gap: "8px",
-                position: "fixed",
-                top: "48px",
-                background: "white",
-                padding: "2px 8px",
-            }}
-        >
+        <div className={styles.promotionDialog}>
             {promotionPieces.map((pieceName) => (
                 <img
                     key={pieceName}

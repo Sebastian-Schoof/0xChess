@@ -2,6 +2,7 @@ import { GameScene } from "game/GameScene";
 import { useEffect, useRef } from "preact/hooks";
 import { PromotionDialog } from "./PromotionDialog";
 import { showDialog } from "./gamestate";
+import styles from "./styles.module.css";
 
 export default function Game() {
     const ref = useRef<HTMLDivElement>(null);
@@ -39,16 +40,7 @@ export default function Game() {
 
     return (
         <>
-            <div
-                id="renderCanvas"
-                style={{
-                    width: "100%",
-                    height: "100%",
-                    overflow: "hidden",
-                    imageRendering: "pixelated",
-                }}
-                ref={ref}
-            />
+            <div id="renderCanvas" className={styles.game} ref={ref} />
             {showDialog.value && (
                 <PromotionDialog
                     side={showDialog.value.side}
