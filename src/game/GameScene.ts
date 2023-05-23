@@ -41,7 +41,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     create() {
-        const socket = new WebSocket("ws://localhost:8080");
+        const socket = new WebSocket(`ws://${window.location.hostname}:8080`);
         const board = new Board({
             scene: this,
             maxQ: 13,
