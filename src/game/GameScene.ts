@@ -64,6 +64,7 @@ export class GameScene extends Phaser.Scene {
             switch (message.type) {
                 case "initialSetup":
                     this.side = message.data.side;
+                    if (this.side === "black") board.lockMovement = true;
                     alert("you will play " + this.side);
                     boardSides.forEach((side) =>
                         message.data.pieces[side].forEach(
@@ -112,6 +113,7 @@ export class GameScene extends Phaser.Scene {
                             message.data.to.r
                         );
                     }
+                    board.lockMovement = false;
                     break;
             }
         });

@@ -1,4 +1,6 @@
+import { showDialog } from "components/Game/gamestate";
 import Phaser from "phaser";
+import { GameScene } from "./GameScene";
 import { getLegalMoves, promotionCoords } from "./Pieces";
 import {
     BoardCoordinates,
@@ -8,8 +10,6 @@ import {
     Piece,
     sideFactor,
 } from "./types";
-import { showDialog } from "components/Game/gamestate";
-import { GameScene } from "./GameScene";
 
 type Hexagon = Phaser.GameObjects.Polygon &
     BoardCoordinates & { defaultColor: number };
@@ -66,6 +66,8 @@ export class Board {
 
     public pieces: BoardPieceObject[] = [];
     public highlightedFields: BoardCoordinates[] = [];
+
+    public lockMovement = false;
 
     constructor({
         scene,
@@ -213,56 +215,56 @@ export class Board {
                         dropZone.fillColor = dropZone.defaultColor;
                         dropZone.fillAlpha = 1;
                         if (
-                            this.highlightedFields.some(
+                            this.lockMovement ||
+                            !this.highlightedFields.some(
                                 (coord) =>
                                     coord.q === dropZone.q &&
                                     coord.r === dropZone.r
                             )
+                        )
+                            return;
+                        this.lockMovement = true;
+                        this.removePiece(dropZone.q, dropZone.r);
+                        if (
+                            piece.piece == "pawn" &&
+                            promotionCoords.some(
+                                (coord) =>
+                                    coord.q * sideFactor[side] === dropZone.q &&
+                                    coord.r * sideFactor[side] === dropZone.r
+                            )
                         ) {
-                            this.removePiece(dropZone.q, dropZone.r);
-                            if (
-                                piece.piece == "pawn" &&
-                                promotionCoords.some(
-                                    (coord) =>
-                                        coord.q * sideFactor[side] ===
-                                            dropZone.q &&
-                                        coord.r * sideFactor[side] ===
-                                            dropZone.r
-                                )
-                            ) {
-                                this.removePiece(piece.q, piece.r);
-                                showDialog.value = {
-                                    side,
-                                    callBack: (newPiece) => {
-                                        showDialog.value = undefined;
-                                        this.onMove({
-                                            from: { q: piece.q, r: piece.r },
-                                            to: {
-                                                q: dropZone.q,
-                                                r: dropZone.r,
-                                            },
-                                            promotion: newPiece,
-                                        });
-                                        const boardPiece = this.scene.loadPiece(
-                                            side,
-                                            newPiece
-                                        );
-                                        this.addPiece(
-                                            boardPiece,
-                                            newPiece,
-                                            side,
-                                            true,
-                                            { q: dropZone.q, r: dropZone.r }
-                                        );
-                                    },
-                                };
-                            } else {
-                                this.onMove({
-                                    from: { q: piece.q, r: piece.r },
-                                    to: { q: dropZone.q, r: dropZone.r },
-                                });
-                                this.placePiece(piece, dropZone.q, dropZone.r);
-                            }
+                            this.removePiece(piece.q, piece.r);
+                            showDialog.value = {
+                                side,
+                                callBack: (newPiece) => {
+                                    showDialog.value = undefined;
+                                    this.onMove({
+                                        from: { q: piece.q, r: piece.r },
+                                        to: {
+                                            q: dropZone.q,
+                                            r: dropZone.r,
+                                        },
+                                        promotion: newPiece,
+                                    });
+                                    const boardPiece = this.scene.loadPiece(
+                                        side,
+                                        newPiece
+                                    );
+                                    this.addPiece(
+                                        boardPiece,
+                                        newPiece,
+                                        side,
+                                        true,
+                                        { q: dropZone.q, r: dropZone.r }
+                                    );
+                                },
+                            };
+                        } else {
+                            this.onMove({
+                                from: { q: piece.q, r: piece.r },
+                                to: { q: dropZone.q, r: dropZone.r },
+                            });
+                            this.placePiece(piece, dropZone.q, dropZone.r);
                         }
                     }
                 );
