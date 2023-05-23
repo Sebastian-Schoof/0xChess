@@ -1,5 +1,5 @@
 import type { initialBoardSetup } from "../game/Pieces";
-import type { BoardCoordinates, BoardSide } from "../game/types";
+import type { BoardSide, Move } from "../game/types";
 
 export type SocketMessage =
     | {
@@ -9,4 +9,7 @@ export type SocketMessage =
               pieces: typeof initialBoardSetup;
           };
       }
-    | { type: "move"; data: [BoardCoordinates, BoardCoordinates] };
+    | {
+          type: "move";
+          data: Move;
+      };

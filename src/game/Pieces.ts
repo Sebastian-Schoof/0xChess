@@ -1,13 +1,13 @@
 import {
     BoardCoordinates,
+    BoardPiece,
     BoardSide,
     Piece,
-    BoardPiece,
-    sideFactor,
     boardSides,
+    sideFactor,
 } from "./types";
 
-const initialSetup = [
+const initialSetup: [Piece, BoardCoordinates][] = [
     ["king", { q: -6, r: 0 }],
     ["queen", { q: -5, r: -1 }],
     ["rook", { q: -4, r: -4 }],
@@ -27,7 +27,7 @@ const initialSetup = [
     ["pawn", { q: -6, r: 2 }],
     ["pawn", { q: -6, r: 3 }],
     ["pawn", { q: -7, r: 4 }],
-] as const;
+];
 
 export const initialBoardSetup = Object.fromEntries(
     boardSides.map(
@@ -47,6 +47,18 @@ export const initialBoardSetup = Object.fromEntries(
             ] as const
     )
 ) as { [side in BoardSide]: [Piece, BoardCoordinates][] };
+
+export const promotionCoords: BoardCoordinates[] = [
+    { q: 8, r: -4 },
+    { q: 7, r: -3 },
+    { q: 7, r: -2 },
+    { q: 6, r: -1 },
+    { q: 6, r: 0 },
+    { q: 5, r: 1 },
+    { q: 5, r: 2 },
+    { q: 4, r: 3 },
+    { q: 4, r: 4 },
+];
 
 const diagonalDirections = [
     { q: 1, r: -2 },

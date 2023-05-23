@@ -3,7 +3,7 @@ import Phaser from "phaser";
 export type Piece = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
 
 export const boardSides = ["white", "black"] as const;
-export type BoardSide = typeof boardSides[number];
+export type BoardSide = (typeof boardSides)[number];
 
 export const sideFactor: { [key in BoardSide]: number } = {
     white: 1,
@@ -21,3 +21,9 @@ export type BoardPiece = {
 export type BoardCoordinates = { q: number; r: number };
 export type BoardPieceObject = Phaser.GameObjects.Image &
     BoardCoordinates & { side: BoardSide; piece: Piece };
+
+export type Move = {
+    from: BoardCoordinates;
+    to: BoardCoordinates;
+    promotion?: Piece;
+};

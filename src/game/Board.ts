@@ -1,11 +1,15 @@
 import Phaser from "phaser";
-import { getLegalMoves } from "./Pieces";
-import type {
+import { getLegalMoves, promotionCoords } from "./Pieces";
+import {
     BoardCoordinates,
     BoardPieceObject,
     BoardSide,
+    Move,
     Piece,
+    sideFactor,
 } from "./types";
+import { showDialog } from "components/Game/gamestate";
+import { GameScene } from "./GameScene";
 
 type Hexagon = Phaser.GameObjects.Polygon &
     BoardCoordinates & { defaultColor: number };
@@ -50,8 +54,8 @@ function hexToPixel(size: number, { q, r }: { q: number; r: number }) {
 }
 
 export class Board {
-    private scene: Phaser.Scene;
-    private onMove: (move: [BoardCoordinates, BoardCoordinates]) => void;
+    private scene: GameScene;
+    private onMove: (move: Move) => void;
 
     public fields: Hexagon[][] = [];
 
@@ -72,13 +76,13 @@ export class Board {
         offsetY,
         onMove,
     }: {
-        scene: Phaser.Scene;
+        scene: GameScene;
         maxQ: number;
         maxR: number;
         tileSize: number;
         offsetX: number;
         offsetY: number;
-        onMove: (move: [BoardCoordinates, BoardCoordinates]) => void;
+        onMove: (move: Move) => void;
     }) {
         this.scene = scene;
         this.maxQ = maxQ;
@@ -216,11 +220,49 @@ export class Board {
                             )
                         ) {
                             this.removePiece(dropZone.q, dropZone.r);
-                            this.onMove([
-                                { q: piece.q, r: piece.r },
-                                { q: dropZone.q, r: dropZone.r },
-                            ]);
-                            this.placePiece(piece, dropZone.q, dropZone.r);
+                            if (
+                                piece.piece == "pawn" &&
+                                promotionCoords.some(
+                                    (coord) =>
+                                        coord.q * sideFactor[side] ===
+                                            dropZone.q &&
+                                        coord.r * sideFactor[side] ===
+                                            dropZone.r
+                                )
+                            ) {
+                                this.removePiece(piece.q, piece.r);
+                                showDialog.value = {
+                                    side,
+                                    callBack: (newPiece) => {
+                                        showDialog.value = undefined;
+                                        this.onMove({
+                                            from: { q: piece.q, r: piece.r },
+                                            to: {
+                                                q: dropZone.q,
+                                                r: dropZone.r,
+                                            },
+                                            promotion: newPiece,
+                                        });
+                                        const boardPiece = this.scene.loadPiece(
+                                            side,
+                                            newPiece
+                                        );
+                                        this.addPiece(
+                                            boardPiece,
+                                            newPiece,
+                                            side,
+                                            true,
+                                            { q: dropZone.q, r: dropZone.r }
+                                        );
+                                    },
+                                };
+                            } else {
+                                this.onMove({
+                                    from: { q: piece.q, r: piece.r },
+                                    to: { q: dropZone.q, r: dropZone.r },
+                                });
+                                this.placePiece(piece, dropZone.q, dropZone.r);
+                            }
                         }
                     }
                 );
