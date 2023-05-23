@@ -1,6 +1,7 @@
-import { run } from "server/socket";
+import { run } from "socketIO/socket";
 
-//TODO: make port configuratble
-run(8080);
+const port = +process.env.PORT! || 8080;
 
-console.log("server running on port", 8080);
+run(port);
+
+console.log("server running on port", port);

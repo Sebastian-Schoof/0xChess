@@ -26,8 +26,7 @@
         "paths": {
             "components/*": ["components/*"],
             "game/*": ["game/*"],
-            "socketIO/*": ["socketIO/*"],
-            "server/*": ["server/*"]
+            "socketIO/*": ["socketIO/*"]
         }
     },
     "include": ["src"],

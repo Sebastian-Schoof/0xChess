@@ -60,7 +60,6 @@ export class GameScene extends Phaser.Scene {
 
         socket.addEventListener("message", (event) => {
             const message = JSON.parse(event.data) as SocketMessage;
-            //TODO: add move lock while waiting for opponent
             switch (message.type) {
                 case "initialSetup":
                     this.side = message.data.side;

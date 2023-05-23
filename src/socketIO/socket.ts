@@ -1,6 +1,6 @@
-import { initialBoardSetup } from "../game/Pieces";
-import { BoardSide, boardSides, oppositeSide } from "../game/types";
-import type { SocketMessage } from "../socketIO/types";
+import { initialBoardSetup } from "game/Pieces";
+import { BoardSide, boardSides, oppositeSide } from "game/types";
+import type { SocketMessage } from "socketIO/types";
 import { WebSocket } from "ws";
 
 const games: ({ [side in BoardSide]?: WebSocket } | null)[] = [];
@@ -30,22 +30,15 @@ export function run(port: number) {
         const [side, gameId] = joinGame(ws);
         const initialSetupMessage: SocketMessage = {
             type: "initialSetup",
-            //TODO: persist game state and account for whites first move
-            //TODO: add sessions to make games resumable
             data: { side, pieces: initialBoardSetup },
         };
         ws.send(JSON.stringify(initialSetupMessage));
 
         ws.on("message", function (message) {
-            //TODO: add validation
-            //TODO: consolidate moves to enable wego
-            //TODO: add winning condition (snatching the king)
-            console.log(message.toString());
             games[gameId]?.[oppositeSide[side]]?.send(message.toString());
         });
 
         ws.on("close", function () {
-            //TODO: handle close in client (maybe send a message)
             games[gameId]?.[oppositeSide[side]]?.close();
             games[gameId] = null;
         });
