@@ -1,5 +1,6 @@
 import { assetName, piecePaths } from "components/Game/assets";
 import Phaser from "phaser";
+import { defaultPort } from "socketIO/const";
 import type { SocketMessage } from "socketIO/types";
 import { Board } from "./Board";
 import {
@@ -41,7 +42,11 @@ export class GameScene extends Phaser.Scene {
     }
 
     create() {
-        const socket = new WebSocket(`ws://${window.location.hostname}:8080`);
+        const socket = new WebSocket(
+            `ws://${window.location.hostname}:${
+                process.env.PORT ?? defaultPort
+            }`
+        );
         const board = new Board({
             scene: this,
             maxQ: 13,
