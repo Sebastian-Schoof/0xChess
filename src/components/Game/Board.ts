@@ -211,7 +211,6 @@ export class Board {
                         hexagon.fillAlpha = 1;
                     }
                 )
-                .on(Phaser.Input.Events.POINTER_DOWN, () => console.log(q, r))
                 .on(
                     Phaser.Input.Events.DROP,
                     (pointer: Phaser.Input.Pointer, dropZone: Hexagon) => {
