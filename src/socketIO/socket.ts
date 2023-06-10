@@ -1,5 +1,6 @@
 import { getLegalMoves, initialBoardSetup, promotionCoords } from "game/Pieces";
 import { BoardPiece, BoardSide, boardSides, oppositeSide } from "game/types";
+import { cloneDeep } from "lodash";
 import type { SocketMessage } from "socketIO/types";
 import { WebSocket } from "ws";
 
@@ -25,7 +26,7 @@ function joinGame(socket: WebSocket) {
     }
     games[gameId] = {
         connections: { [side]: socket },
-        state: { pieces: initialBoardSetup, toMove: "white" },
+        state: { pieces: cloneDeep(initialBoardSetup), toMove: "white" },
     };
     return [side, gameId] as const;
 }
@@ -50,7 +51,7 @@ export function run(port: number) {
         ws.send(JSON.stringify(initialSetupMessage));
 
         ws.on("message", function (message) {
-            if (side !== games[gameId]!.state.toMove) {
+            if (side !== games[gameId]?.state.toMove) {
                 closeGame(gameId);
                 return;
             }
