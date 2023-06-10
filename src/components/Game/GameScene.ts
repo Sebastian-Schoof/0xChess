@@ -1,35 +1,44 @@
 import { assetName, piecePaths } from "components/Game/assets";
+import { BoardPieceObject, BoardSide, Piece, oppositeSide } from "game/types";
 import Phaser from "phaser";
 import { defaultPort } from "socketIO/const";
 import type { SocketMessage } from "socketIO/types";
 import { Board } from "./Board";
-import { BoardPieceObject, BoardSide, Piece, oppositeSide } from "./types";
+
+const assetConfig: Phaser.Types.Loader.FileTypes.SVGSizeConfig = { scale: 2 };
 
 export class GameScene extends Phaser.Scene {
     private side?: BoardSide;
+
+    private loadAsset(side: BoardSide, piece: Piece) {
+        this.load.svg(
+            assetName(side, piece),
+            piecePaths[side][piece],
+            assetConfig
+        );
+    }
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
         super(config);
     }
 
     preload() {
-        this.load.image(assetName("white", "king"), piecePaths.white.king);
-        this.load.image(assetName("black", "king"), piecePaths.black.king);
-        this.load.image(assetName("white", "queen"), piecePaths.white.queen);
-        this.load.image(assetName("black", "queen"), piecePaths.black.queen);
-        this.load.image(assetName("white", "rook"), piecePaths.white.rook);
-        this.load.image(assetName("black", "rook"), piecePaths.black.rook);
-        this.load.image(assetName("white", "bishop"), piecePaths.white.bishop);
-        this.load.image(assetName("black", "bishop"), piecePaths.black.bishop);
-        this.load.image(assetName("white", "knight"), piecePaths.white.knight);
-        this.load.image(assetName("black", "knight"), piecePaths.black.knight);
-        this.load.image(assetName("white", "pawn"), piecePaths.white.pawn);
-        this.load.image(assetName("black", "pawn"), piecePaths.black.pawn);
+        this.loadAsset("white", "king");
+        this.loadAsset("black", "king");
+        this.loadAsset("white", "queen");
+        this.loadAsset("black", "queen");
+        this.loadAsset("white", "rook");
+        this.loadAsset("black", "rook");
+        this.loadAsset("white", "bishop");
+        this.loadAsset("black", "bishop");
+        this.loadAsset("white", "knight");
+        this.loadAsset("black", "knight");
+        this.loadAsset("white", "pawn");
+        this.loadAsset("black", "pawn");
     }
 
     loadPiece(side: BoardSide, piece: Piece) {
         const newPiece = this.add.image(0, 0, side + piece) as BoardPieceObject;
-        newPiece.scale = 0.5;
         newPiece.setInteractive();
         this.input.setDraggable(newPiece);
         return newPiece;
@@ -45,9 +54,9 @@ export class GameScene extends Phaser.Scene {
             scene: this,
             maxQ: 13,
             maxR: 9,
-            tileSize: 20,
-            offsetX: 50,
-            offsetY: 55,
+            tileSize: 80,
+            offsetX: 140,
+            offsetY: 160,
             onMove: (move) => {
                 const socketMessage: SocketMessage = {
                     type: "move",

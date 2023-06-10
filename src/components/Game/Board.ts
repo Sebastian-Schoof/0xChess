@@ -1,7 +1,5 @@
 import { showDialog } from "components/Game/gamestate";
-import Phaser from "phaser";
-import { GameScene } from "./GameScene";
-import { getLegalMoves, promotionCoords } from "./Pieces";
+import { getLegalMoves, promotionCoords } from "game/Pieces";
 import {
     BoardCoordinates,
     BoardPieceObject,
@@ -9,7 +7,9 @@ import {
     Move,
     Piece,
     sideFactor,
-} from "./types";
+} from "game/types";
+import Phaser from "phaser";
+import { GameScene } from "./GameScene";
 
 type Hexagon = Phaser.GameObjects.Polygon &
     BoardCoordinates & { defaultColor: number };
@@ -105,14 +105,14 @@ export class Board {
                     size: tileSize,
                     x: x + offsetX,
                     y: y + offsetY,
-                    color: [0x769656, 0xeeeed2, 0xbaca44][
+                    color: [0xd18b47, 0xeeaa66, 0xffcc99][
                         (q - (r % 2) + 3) % 3
                     ]!,
                     q: qAxial - this.offsetQ,
                     r: r - this.offsetR,
                 });
                 hexagon.isStroked = true;
-                hexagon.strokeColor = 0xffffff;
+                hexagon.strokeColor = 0x000000;
                 this.fields[r]?.push(hexagon);
             }
         }
@@ -211,6 +211,7 @@ export class Board {
                         hexagon.fillAlpha = 1;
                     }
                 )
+                .on(Phaser.Input.Events.POINTER_DOWN, () => console.log(q, r))
                 .on(
                     Phaser.Input.Events.DROP,
                     (pointer: Phaser.Input.Pointer, dropZone: Hexagon) => {

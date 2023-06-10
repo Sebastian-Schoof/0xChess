@@ -1,8 +1,11 @@
-import { GameScene } from "game/GameScene";
 import { useEffect, useRef } from "preact/hooks";
+import { GameScene } from "./GameScene";
 import { PromotionDialog } from "./PromotionDialog";
 import { showDialog } from "./gamestate";
 import styles from "./styles.module.css";
+
+const canvasWidth = 1805;
+const canvasHeight = 1120;
 
 export default function Game() {
     const ref = useRef<HTMLDivElement>(null);
@@ -11,27 +14,25 @@ export default function Game() {
         const config: Phaser.Types.Core.GameConfig = {
             type: Phaser.AUTO,
             parent: "renderCanvas",
-            width: 240 * 2,
-            height: 160 * 2,
+            width: canvasWidth,
+            height: canvasHeight,
             scene: GameScene,
             transparent: true,
         };
 
         const game = new Phaser.Game(config);
-        game.scale.autoCenter = 2;
+        game.scale.autoCenter = 4;
 
         const updateZoom = () =>
             game.scale.setZoom(
                 Math.floor(
                     Math.min(
                         (ref.current?.getBoundingClientRect().width ??
-                            240 * 2) /
-                            (240 * 2),
+                            canvasWidth) / canvasWidth,
                         (ref.current?.getBoundingClientRect().height ??
-                            160 * 2) /
-                            (160 * 2)
+                            canvasHeight) / canvasHeight
                     )
-                )
+                ) || 0.5
             );
         updateZoom();
         window.addEventListener("resize", updateZoom);
