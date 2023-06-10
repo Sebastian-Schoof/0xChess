@@ -5,17 +5,13 @@ import { defaultPort } from "socketIO/const";
 import type { SocketMessage } from "socketIO/types";
 import { Board } from "./Board";
 
-const assetConfig: Phaser.Types.Loader.FileTypes.SVGSizeConfig = { scale: 2 };
-
 export class GameScene extends Phaser.Scene {
     private side?: BoardSide;
 
     private loadAsset(side: BoardSide, piece: Piece) {
-        this.load.svg(
-            assetName(side, piece),
-            piecePaths[side][piece],
-            assetConfig
-        );
+        this.load.svg(assetName(side, piece), piecePaths[side][piece], {
+            scale: 2,
+        });
     }
 
     constructor(config: string | Phaser.Types.Scenes.SettingsConfig) {
@@ -38,7 +34,11 @@ export class GameScene extends Phaser.Scene {
     }
 
     loadPiece(side: BoardSide, piece: Piece) {
-        const newPiece = this.add.image(0, 0, side + piece) as BoardPieceObject;
+        const newPiece = this.add.image(
+            0,
+            0,
+            assetName(side, piece)
+        ) as BoardPieceObject;
         newPiece.setInteractive();
         this.input.setDraggable(newPiece);
         return newPiece;
@@ -52,7 +52,7 @@ export class GameScene extends Phaser.Scene {
         );
         const board = new Board({
             scene: this,
-            maxQ: 13,
+            maxQ: 9,
             maxR: 9,
             tileSize: 80,
             offsetX: 140,

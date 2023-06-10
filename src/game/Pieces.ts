@@ -8,26 +8,30 @@ import {
 } from "./types";
 
 const initialSetup: [Piece, BoardCoordinates][] = [
-    ["king", { q: -6, r: 0 }],
-    ["queen", { q: -5, r: -1 }],
-    ["rook", { q: -4, r: -4 }],
-    ["rook", { q: -8, r: 4 }],
-    ["bishop", { q: -5, r: -2 }],
-    ["bishop", { q: -5, r: 0 }],
-    ["bishop", { q: -6, r: 1 }],
-    ["knight", { q: -4, r: -3 }],
-    ["knight", { q: -7, r: 2 }],
-    ["knight", { q: -7, r: 3 }],
-    ["pawn", { q: -3, r: -4 }],
-    ["pawn", { q: -3, r: -3 }],
-    ["pawn", { q: -4, r: -2 }],
-    ["pawn", { q: -4, r: -1 }],
-    ["pawn", { q: -4, r: 0 }],
-    ["pawn", { q: -5, r: 1 }],
-    ["pawn", { q: -6, r: 2 }],
-    ["pawn", { q: -6, r: 3 }],
-    ["pawn", { q: -7, r: 4 }],
+    ["king", { q: -4, r: 0 }],
+    ["queen", { q: -3, r: -1 }],
+    ["rook", { q: -2, r: -4 }],
+    ["rook", { q: -6, r: 4 }],
+    ["bishop", { q: -3, r: -2 }],
+    ["bishop", { q: -3, r: 0 }],
+    ["bishop", { q: -4, r: 1 }],
+    ["knight", { q: -2, r: -3 }],
+    ["knight", { q: -5, r: 2 }],
+    ["knight", { q: -5, r: 3 }],
+    ["pawn", { q: -1, r: -4 }],
+    ["pawn", { q: -1, r: -3 }],
+    ["pawn", { q: -2, r: -2 }],
+    ["pawn", { q: -2, r: -1 }],
+    ["pawn", { q: -2, r: 0 }],
+    ["pawn", { q: -3, r: 1 }],
+    ["pawn", { q: -4, r: 2 }],
+    ["pawn", { q: -4, r: 3 }],
+    ["pawn", { q: -5, r: 4 }],
 ];
+
+const initialPawnSetup: BoardCoordinates[] = initialSetup
+    .filter(([piece]) => piece === "pawn")
+    .map(([, coords]) => coords);
 
 export const initialBoardSetup: BoardPiece[] = boardSides.flatMap((side) =>
     initialSetup.flatMap(([piece, { q, r }]) => ({
@@ -149,8 +153,15 @@ const legalMoves: {
         );
     },
     pawn: (coords, side, boardPieces) => {
-        const legalFields = new Array(2);
-        for (let idx = 0; idx < 2; idx++) {
+        const range = initialPawnSetup.some(
+            ({ q, r }) =>
+                coords.q === sideFactor[side] * q &&
+                coords.r === sideFactor[side] * r
+        )
+            ? 2
+            : 1;
+        const legalFields = new Array(range);
+        for (let idx = 0; idx < range; idx++) {
             const field = {
                 q: coords.q + (idx + 1) * sideFactor[side],
                 r: coords.r,
