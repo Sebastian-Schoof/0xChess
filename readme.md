@@ -16,8 +16,7 @@ note however, that you need to host the frontend if you want to play in your loc
 
 ## what's next for this project?
 
-[ ] math making with friend codes
-[ ] move validation on the server (don't play webdevs for now ;) )
-[ ] new "rendering" (the pixelation will vanish)
+[ ] match making with friend codes
+[ ] new "rendering" (the pixelation will vanish, probably even phaser)
 [ ] enabling clock games
 [ ] enabling correspondence games (incl. sessions, maybe even accounts)
