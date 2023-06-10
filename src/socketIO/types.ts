@@ -7,6 +7,7 @@ export type SocketMessage =
           data: {
               side: BoardSide;
               pieces: typeof initialBoardSetup;
+              toMove: BoardSide;
           };
       }
     | {

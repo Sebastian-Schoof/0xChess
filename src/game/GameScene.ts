@@ -3,13 +3,7 @@ import Phaser from "phaser";
 import { defaultPort } from "socketIO/const";
 import type { SocketMessage } from "socketIO/types";
 import { Board } from "./Board";
-import {
-    BoardPieceObject,
-    BoardSide,
-    Piece,
-    boardSides,
-    oppositeSide,
-} from "./types";
+import { BoardPieceObject, BoardSide, Piece, oppositeSide } from "./types";
 
 export class GameScene extends Phaser.Scene {
     private side?: BoardSide;
@@ -68,25 +62,19 @@ export class GameScene extends Phaser.Scene {
             switch (message.type) {
                 case "initialSetup":
                     this.side = message.data.side;
-                    if (this.side === "black") board.lockMovement = true;
+                    if (this.side !== message.data.toMove)
+                        board.lockMovement = true;
                     alert("you will play " + this.side);
-                    boardSides.forEach((side) =>
-                        message.data.pieces[side].forEach(
-                            ([pieceName, coords]) => {
-                                const newPiece = this.loadPiece(
-                                    side,
-                                    pieceName
-                                );
-                                board.addPiece(
-                                    newPiece,
-                                    pieceName,
-                                    side,
-                                    side === message.data.side,
-                                    coords
-                                );
-                            }
-                        )
-                    );
+                    message.data.pieces.forEach(({ side, piece, coords }) => {
+                        const newPiece = this.loadPiece(side, piece);
+                        board.addPiece(
+                            newPiece,
+                            piece,
+                            side,
+                            side === message.data.side,
+                            coords
+                        );
+                    });
                     break;
                 case "move":
                     const takenPiece = board.pieces.find(

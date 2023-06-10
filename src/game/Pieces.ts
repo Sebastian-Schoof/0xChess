@@ -29,24 +29,16 @@ const initialSetup: [Piece, BoardCoordinates][] = [
     ["pawn", { q: -7, r: 4 }],
 ];
 
-export const initialBoardSetup = Object.fromEntries(
-    boardSides.map(
-        (side) =>
-            [
-                side,
-                initialSetup.map(
-                    ([piece, { q, r }]) =>
-                        [
-                            piece,
-                            {
-                                q: q * sideFactor[side],
-                                r: r * sideFactor[side],
-                            },
-                        ] as const
-                ),
-            ] as const
-    )
-) as { [side in BoardSide]: [Piece, BoardCoordinates][] };
+export const initialBoardSetup: BoardPiece[] = boardSides.flatMap((side) =>
+    initialSetup.flatMap(([piece, { q, r }]) => ({
+        side,
+        piece,
+        coords: {
+            q: q * sideFactor[side],
+            r: r * sideFactor[side],
+        },
+    }))
+);
 
 export const promotionCoords: BoardCoordinates[] = [
     { q: 8, r: -4 },
