@@ -16,7 +16,7 @@ note however, that you need to host the frontend if you want to play in your loc
 
 ## what's next for this project?
 
-[ ] match making with friend codes
-[ ] new "rendering" (the pixelation will vanish, probably even phaser)
-[ ] enabling clock games
-[ ] enabling correspondence games (incl. sessions, maybe even accounts)
+- [ ] match making with friend codes
+- [ ] new "rendering" (the pixelation will vanish, probably even phaser)
+- [ ] enabling clock games
+- [ ] enabling correspondence games (incl. sessions, maybe even accounts)
