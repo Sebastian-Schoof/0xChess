@@ -1,124 +1,108 @@
-import { getLegalMoves, initialBoardSetup, promotionCoords } from "game/Pieces";
-import { BoardPiece, BoardSide, boardSides, oppositeSide } from "game/types";
-import { cloneDeep } from "lodash";
-import type { SocketMessage } from "socketIO/types";
-import { WebSocket } from "ws";
+import { WebSocket as WS } from "ws";
+import { defaultPort } from "./const";
+import { ClientSocketMessage, ServerSocketMessage } from "./types";
 
-const games: ({
-    connections: { [side in BoardSide]?: WebSocket };
-    state: { pieces: BoardPiece[]; toMove: BoardSide };
-} | null)[] = [];
+type SocketMessage = ClientSocketMessage | ServerSocketMessage;
+type CallBacks<T extends SocketMessage> = Partial<{
+    [key in keyof T]: ((data: T[key]) => void)[];
+}>;
 
-function joinGame(socket: WebSocket) {
-    for (let gameId = 0; gameId < games.length; gameId++) {
-        if (!games[gameId]) continue;
-        for (let side of boardSides)
-            if (games[gameId]!.connections[side] === undefined) {
-                games[gameId]!.connections[side] = socket;
-                return [side, gameId] as const;
-            }
-    }
-
-    const side = boardSides[Math.floor(Math.random() * 2)]!;
-    let gameId = games.indexOf(null);
-    if (gameId == -1) {
-        gameId = games.length;
-    }
-    games[gameId] = {
-        connections: { [side]: socket },
-        state: { pieces: cloneDeep(initialBoardSetup), toMove: "white" },
-    };
-    return [side, gameId] as const;
-}
-
-function closeGame(gameId: number) {
-    boardSides.forEach((side) => games[gameId]?.connections[side]?.close());
-    games[gameId] = null;
-}
-
-export function run(port: number) {
-    const wss = new WebSocket.Server({ port });
-    wss.on("connection", function (ws) {
-        const [side, gameId] = joinGame(ws);
-        const initialSetupMessage: SocketMessage = {
-            type: "initialSetup",
-            data: {
-                side,
-                pieces: games[gameId]!.state.pieces,
-                toMove: games[gameId]!.state.toMove,
-            },
+class Socket<
+    OutMessage extends SocketMessage,
+    InMessage extends SocketMessage
+> {
+    private socket: WS | WebSocket;
+    private messageCallbacks: CallBacks<InMessage> = {};
+    private closeCallbacks: (() => void)[] = [];
+    constructor(socket: WS | WebSocket, onClose?: () => void) {
+        this.socket = socket;
+        const onMessage = (message: any) => {
+            const [messageType, messageData] = Object.entries(
+                JSON.parse(message.data ?? message) //TODO: maybe try catch
+            )[0] as [keyof InMessage, InMessage[keyof InMessage]];
+            this.messageCallbacks[messageType]?.forEach((cb) =>
+                cb(messageData)
+            );
         };
-        ws.send(JSON.stringify(initialSetupMessage));
+        switch (this.socket.constructor) {
+            case WS:
+                (socket as WS).on("message", onMessage);
+                if (onClose) (socket as WS).on("close", onClose);
+                break;
+            case WebSocket:
+                (socket as WebSocket).addEventListener("message", onMessage);
+                if (onClose)
+                    (socket as WebSocket).addEventListener("close", onClose);
+                break;
+        }
+    }
 
-        ws.on("message", function (message) {
-            if (side !== games[gameId]?.state.toMove) {
-                closeGame(gameId);
-                return;
-            }
-            games[gameId]!.state.toMove = oppositeSide[side];
-            let parsedMessage: SocketMessage;
-            try {
-                parsedMessage = JSON.parse(message as any) as SocketMessage;
-                if (parsedMessage?.type !== "move") {
-                    closeGame(gameId);
-                    return;
-                }
-            } catch {
-                closeGame(gameId);
-                return;
-            }
-            const movingPiece = games[gameId]!.state.pieces.find(
-                (piece) =>
-                    parsedMessage?.type === "move" && //TODO: remove typing related runtime overhead
-                    piece.side === side &&
-                    piece.coords.q === parsedMessage.data.from.q &&
-                    piece.coords.r === parsedMessage.data.from.r
-            );
-            if (!movingPiece) {
-                closeGame(gameId);
-                return;
-            }
-            const legalMoves = getLegalMoves(
-                movingPiece.piece,
-                side,
-                parsedMessage.data.from,
-                games[gameId]!.state.pieces
-            );
-            if (
-                !legalMoves.some(
-                    ({ q, r }) =>
-                        parsedMessage?.type === "move" && //TODO: remove typing related runtime overhead
-                        r === parsedMessage.data.to.r &&
-                        q === parsedMessage.data.to.q
-                )
-            ) {
-                closeGame(gameId);
-                return;
-            }
-            const promotionPiece = parsedMessage.data.promotion;
-            const movedOntoPromotion = promotionCoords.some(
-                ({ q, r }) =>
-                    parsedMessage?.type === "move" && //TODO: remove typing related runtime overhead
-                    q === parsedMessage.data.to.q &&
-                    r === parsedMessage.data.to.r
-            );
-            if (
-                (promotionPiece && !movedOntoPromotion) ||
-                (movedOntoPromotion && !promotionPiece)
-            ) {
-                closeGame(gameId);
-                return;
-            }
-            movingPiece.coords = parsedMessage.data.to;
-            if (promotionPiece) movingPiece.piece = promotionPiece;
-            games[gameId]?.connections[oppositeSide[side]]?.send(
-                message.toString()
-            );
-        });
+    get state() {
+        return this.socket.readyState;
+    }
 
-        ws.on("close", function () {
-            games[gameId]?.connections[oppositeSide[side]]?.close();
-            games[gameId] = null;
-        });
+    sendMessage<K extends keyof OutMessage>(message: Pick<OutMessage, K>) {
+        this.socket.send(JSON.stringify(message));
+    }
+
+    addMessageHandler<K extends keyof InMessage>(
+        type: K,
+        callBack: (data: InMessage[K]) => void
+    ) {
+        this.messageCallbacks[type] = (
+            this.messageCallbacks[type] ?? []
+        ).concat(callBack);
+    }
+
+    removeMessageHandler<K extends keyof InMessage>(
+        type: K,
+        callBack: (data: InMessage[K]) => void
+    ) {
+        this.messageCallbacks[type] = this.messageCallbacks[type]?.filter(
+            (cb) => cb !== callBack
+        );
+    }
+
+    clearMessageHandler(type: keyof InMessage) {
+        this.messageCallbacks[type] = [];
+    }
+
+    addCloseHandler(callBack: () => void) {
+        this.closeCallbacks = (this.closeCallbacks ?? []).concat(callBack);
+    }
+
+    removeCloseHandler(callBack: () => void) {
+        this.closeCallbacks = this.closeCallbacks?.filter(
+            (cb) => cb !== callBack
+        );
+    }
+
+    close() {
+        this.socket.close();
+    }
+}
+export type ServerSocket = Socket<ServerSocketMessage, ClientSocketMessage>;
+
+export const openSocketServer = () =>
+    new WS.Server({
+        port: +process.env.PORT! || defaultPort,
     });
+
+export function openServerSocket(
+    onConnect: (ws: Socket<ServerSocketMessage, ClientSocketMessage>) => void
+) {
+    const wss = new WS.Server({
+        port: +process.env.PORT! || defaultPort,
+    });
+    wss.on("connection", (ws) => onConnect(new Socket(ws)));
+}
+
+export type ClientSocket = Socket<ClientSocketMessage, ServerSocketMessage>;
+
+export function openClientSocket(onOpen: () => void, onClose?: () => void) {
+    const ws = new WebSocket(
+        `ws://${window.location.hostname}:${process.env.PORT ?? defaultPort}`
+    );
+    ws.addEventListener("open", onOpen);
+    return new Socket<ClientSocketMessage, ServerSocketMessage>(ws, onClose);
 }

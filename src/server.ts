@@ -1,8 +1,5 @@
-import { defaultPort } from "socketIO/const";
-import { run } from "socketIO/socket";
+import { run } from "socketIO/server";
 
-const port = +process.env.PORT! || defaultPort;
+run();
 
-run(port);
-
-console.log("server running on port", port);
+console.log("server running");

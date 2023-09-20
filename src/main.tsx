@@ -1,5 +1,5 @@
+import { App } from "components/App.tsx";
 import { render } from "preact";
-import { App } from "./app.tsx";
 import "./main.css";
 
 render(<App />, document.getElementById("app") as HTMLElement);

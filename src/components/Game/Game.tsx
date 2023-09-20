@@ -14,6 +14,7 @@ export default function Game() {
     useEffect(() => {
         const config: Phaser.Types.Core.GameConfig = {
             type: Phaser.AUTO,
+            fps: { limit: 60 },
             parent: "renderCanvas",
             width: canvasWidth,
             height: canvasHeight,
