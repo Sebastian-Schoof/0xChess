@@ -14,7 +14,7 @@ npm i && npm start
 ```
 
 note however, that you need to host the frontend if you want to play in your local network
-(e.g. by adding `server: { host: true },` the `vite.config.ts`)
+(e.g. by adding `server: { host: true },` to the `vite.config.ts`)
 
 ## what's next for this project?
 

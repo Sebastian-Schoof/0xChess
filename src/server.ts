@@ -1,4 +1,4 @@
-import { run } from "socketIO/server";
+import { run } from "server/main";
 
 run();
 
