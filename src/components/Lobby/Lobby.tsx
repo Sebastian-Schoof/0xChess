@@ -1,4 +1,4 @@
-import { socket } from "components/socket";
+import { socket } from "components/signals";
 import { useRef, useState } from "preact/hooks";
 import styles from "./styles.module.css";
 

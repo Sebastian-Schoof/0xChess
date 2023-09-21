@@ -60,7 +60,9 @@ export class Gameplay implements SessionState {
             }
             movingPiece.coords = move.to;
             if (promotionPiece) movingPiece.piece = promotionPiece;
-            game.connections[oppositeSide[this.side]]?.sendMessage({ move });
+            game.connections[oppositeSide[this.side]]?.socket?.sendMessage({
+                move,
+            });
             //TODO: check for mate
         });
 
@@ -77,7 +79,12 @@ export class Gameplay implements SessionState {
     }
 
     leave() {
-        this.gameId && this.stateManager.serverState.closeGame(this.gameId);
+        this.gameId &&
+            this.stateManager.userId &&
+            this.stateManager.serverState.leaveGame(
+                this.gameId,
+                this.stateManager.userId
+            );
         this.stateManager.socket.clearMessageHandler("move");
     }
 }

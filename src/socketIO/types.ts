@@ -9,7 +9,7 @@ export type ServerSocketMessage = {
     };
 } & { friendCode: string } & MoveMessage;
 
-export type ClientSocketMessage = {
+export type ClientSocketMessage = { identity: string } & {
     requestGame: "friend" | "random";
 } & {
     joinGame: string;

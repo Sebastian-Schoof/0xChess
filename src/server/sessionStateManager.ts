@@ -7,6 +7,7 @@ import { ServerState } from "./serverState";
 export class SessionStateManager {
     private activeState: Matchmaking | Gameplay;
     public serverState: ServerState;
+    public userId: string | undefined;
     public socket: ServerSocket;
     constructor(serverState: ServerState, socket: ServerSocket) {
         this.serverState = serverState;

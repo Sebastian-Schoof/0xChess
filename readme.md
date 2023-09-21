@@ -20,5 +20,5 @@ note however, that you need to host the frontend if you want to play in your loc
 
 -   [ ] enable WeGo mechanic
 -   [ ] enable clock games
--   [ ] enable correspondence games (incl. sessions, maybe even accounts)
+-   [ ] enable concurrent games (maybe even accounts)
 -   [ ] make socket protocol more robust

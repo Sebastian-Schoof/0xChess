@@ -1,5 +1,5 @@
 import { assetName, piecePaths } from "components/Game/assets";
-import { socket } from "components/socket";
+import { sceneInitiated, socket } from "components/signals";
 import { BoardPieceObject, BoardSide, Piece, oppositeSide } from "game/types";
 import Phaser from "phaser";
 import { Board } from "./Board";
@@ -104,5 +104,7 @@ export class GameScene extends Phaser.Scene {
             }
             board.lockMovement = false;
         });
+
+        sceneInitiated.value = true;
     }
 }
