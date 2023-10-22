@@ -2,18 +2,19 @@ import { getLegalMoves, promotionCoords } from "game/Pieces";
 import { BoardSide, oppositeSide } from "game/types";
 import { SessionStateManager } from "./sessionStateManager";
 import { SessionState } from "./types";
+import { updateGame } from "db/interface/games";
 
 export class Gameplay implements SessionState {
     constructor(
         private stateManager: SessionStateManager,
         private side: BoardSide,
-        private gameId: number
+        private gameId: string,
     ) {}
 
     enter() {
         this.stateManager.socket.addMessageHandler("move", (move) => {
             const game = this.stateManager.serverState.getGameById(
-                this.gameId!
+                this.gameId!,
             );
             if (!game) {
                 return;
@@ -23,25 +24,25 @@ export class Gameplay implements SessionState {
                 return;
             }
             game.state.toMove = oppositeSide[this.side];
-            const movingPiece = game.state.pieces.find(
+            const movingPieceRef = game.state.pieces.find(
                 (piece) =>
                     piece.side === this.side &&
                     piece.coords.q === move.from.q &&
-                    piece.coords.r === move.from.r
+                    piece.coords.r === move.from.r,
             );
-            if (!movingPiece) {
+            if (!movingPieceRef) {
                 this.stateManager.serverState.closeGame(this.gameId!);
                 return;
             }
             const legalMoves = getLegalMoves(
-                movingPiece.piece,
+                movingPieceRef.piece,
                 this.side,
                 move.from,
-                game.state.pieces
+                game.state.pieces,
             );
             if (
                 !legalMoves.some(
-                    ({ q, r }) => r === move.to.r && q === move.to.q
+                    ({ q, r }) => r === move.to.r && q === move.to.q,
                 )
             ) {
                 this.stateManager.serverState.closeGame(this.gameId!);
@@ -49,7 +50,7 @@ export class Gameplay implements SessionState {
             }
             const promotionPiece = move.promotion;
             const movedOntoPromotion = promotionCoords.some(
-                ({ q, r }) => q === move.to.q && r === move.to.r
+                ({ q, r }) => q === move.to.q && r === move.to.r,
             );
             if (
                 (promotionPiece && !movedOntoPromotion) ||
@@ -58,16 +59,17 @@ export class Gameplay implements SessionState {
                 this.stateManager.serverState.closeGame(this.gameId!);
                 return;
             }
-            movingPiece.coords = move.to;
-            if (promotionPiece) movingPiece.piece = promotionPiece;
+            movingPieceRef.coords = move.to;
+            if (promotionPiece) movingPieceRef.piece = promotionPiece;
             game.connections[oppositeSide[this.side]]?.socket?.sendMessage({
                 move,
             });
+            updateGame(this.gameId, game.state.pieces);
             //TODO: check for mate
         });
 
         const joinedGame = this.stateManager.serverState.getGameById(
-            this.gameId
+            this.gameId,
         )!;
         this.stateManager.socket.sendMessage({
             initialSetup: {
@@ -83,7 +85,7 @@ export class Gameplay implements SessionState {
             this.stateManager.userId &&
             this.stateManager.serverState.leaveGame(
                 this.gameId,
-                this.stateManager.userId
+                this.stateManager.userId,
             );
         this.stateManager.socket.clearMessageHandler("move");
     }

@@ -19,7 +19,7 @@ export class SessionStateManager {
         this.activeState.enter();
     }
 
-    next(gameInfo?: readonly [BoardSide, number]) {
+    next(gameInfo?: readonly [side: BoardSide, gameId: string]) {
         this.activeState.leave();
         this.activeState = gameInfo
             ? new Gameplay(this, ...gameInfo)

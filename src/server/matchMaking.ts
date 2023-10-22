@@ -10,7 +10,10 @@ export class Matchmaking implements SessionState {
         this.stateManager.socket.addMessageHandler("identity", (userId) => {
             this.stateManager.userId = userId;
             const joinedGame =
-                this.stateManager.serverState.getJoinedGameForUser(userId);
+                this.stateManager.serverState.getJoinedGameForUser(
+                    userId,
+                    this.stateManager.socket,
+                );
             if (joinedGame) {
                 this.stateManager.next(joinedGame);
             }
@@ -19,7 +22,7 @@ export class Matchmaking implements SessionState {
             "requestGame",
             (opponent) => {
                 if (!this.stateManager.userId) return;
-                let gameInfo: readonly [BoardSide, number] | undefined =
+                let gameInfo: readonly [BoardSide, string] | undefined =
                     undefined;
                 switch (opponent) {
                     case "friend":
@@ -28,25 +31,25 @@ export class Matchmaking implements SessionState {
                         gameInfo = this.stateManager.serverState.joinNewGame(
                             this.stateManager.userId,
                             this.stateManager.socket,
-                            friendCode
+                            friendCode,
                         );
                         break;
                     case "random":
                         gameInfo = this.stateManager.serverState.joinNewGame(
                             this.stateManager.userId,
-                            this.stateManager.socket
+                            this.stateManager.socket,
                         );
                         break;
                 }
                 this.stateManager.next(gameInfo);
-            }
+            },
         );
         this.stateManager.socket.addMessageHandler("joinGame", (friendCode) => {
             if (!this.stateManager.userId) return;
             const gameInfo = this.stateManager.serverState.joinNewGame(
                 this.stateManager.userId,
                 this.stateManager.socket,
-                friendCode.toUpperCase()
+                friendCode.toUpperCase(),
             );
             this.stateManager.next(gameInfo);
         });

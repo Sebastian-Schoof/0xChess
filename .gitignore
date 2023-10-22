@@ -1,3 +1,6 @@
+# DB files
+games.db*
+
 # Logs
 logs
 *.log
