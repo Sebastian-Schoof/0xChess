@@ -41,19 +41,20 @@ export const initialBoardSetup: BoardPiece[] = boardSides.flatMap((side) =>
             q: q * sideFactor[side],
             r: r * sideFactor[side],
         },
-    }))
+    })),
 );
 
 export const promotionCoords: BoardCoordinates[] = [
-    { q: 8, r: -4 },
-    { q: 7, r: -3 },
-    { q: 7, r: -2 },
-    { q: 6, r: -1 },
-    { q: 6, r: 0 },
-    { q: 5, r: 1 },
-    { q: 5, r: 2 },
-    { q: 4, r: 3 },
-    { q: 4, r: 4 },
+    { q: -4, r: 0 },
+    { q: -3, r: -1 },
+    { q: -2, r: -4 },
+    { q: -6, r: 4 },
+    { q: -3, r: -2 },
+    { q: -3, r: 0 },
+    { q: -4, r: 1 },
+    { q: -2, r: -3 },
+    { q: -5, r: 2 },
+    { q: -5, r: 3 },
 ];
 
 const diagonalDirections = [
@@ -87,14 +88,14 @@ function scaleCheck(
     side: BoardSide,
     boardPieces: BoardPiece[],
     directions: typeof diagonalDirections | typeof straightDirections,
-    maxDirectionScale: number
+    maxDirectionScale: number,
 ) {
     const legalFields = [] as BoardCoordinates[];
     for (const direction of [1, -1].flatMap((factor) =>
         directions.map((direction) => ({
             q: direction.q * factor,
             r: direction.r * factor,
-        }))
+        })),
     )) {
         let directionScale = 1;
         while (directionScale <= maxDirectionScale) {
@@ -105,7 +106,7 @@ function scaleCheck(
             const pieceOnTargetField = boardPieces.find(
                 ({ coords: pieceCoords }) =>
                     pieceCoords.q === targetField.q &&
-                    pieceCoords.r === targetField.r
+                    pieceCoords.r === targetField.r,
             );
             if (!pieceOnTargetField || pieceOnTargetField.side !== side)
                 legalFields.push(targetField);
@@ -120,16 +121,16 @@ const legalMoves: {
     [key in Piece]: (
         coordinates: BoardCoordinates,
         side: BoardSide,
-        boardPieces: BoardPiece[]
+        boardPieces: BoardPiece[],
     ) => BoardCoordinates[];
 } = {
     king: (coords, side, boardPieces) =>
         scaleCheck(coords, side, boardPieces, straightDirections, 1).concat(
-            scaleCheck(coords, side, boardPieces, diagonalDirections, 1)
+            scaleCheck(coords, side, boardPieces, diagonalDirections, 1),
         ),
     queen: (coords, side, boardPieces) =>
         scaleCheck(coords, side, boardPieces, straightDirections, 12).concat(
-            scaleCheck(coords, side, boardPieces, diagonalDirections, 8)
+            scaleCheck(coords, side, boardPieces, diagonalDirections, 8),
         ),
     rook: (coords, side, boardPieces) =>
         scaleCheck(coords, side, boardPieces, straightDirections, 12),
@@ -140,7 +141,7 @@ const legalMoves: {
             knightDirections.map((direction) => ({
                 q: coords.q + direction.q * factor,
                 r: coords.r + direction.r * factor,
-            }))
+            })),
         );
         return targets.filter(
             (field) =>
@@ -148,15 +149,15 @@ const legalMoves: {
                     ({ side: pieceSide, coords }) =>
                         pieceSide === side &&
                         field.q === coords.q &&
-                        field.r === coords.r
-                )
+                        field.r === coords.r,
+                ),
         );
     },
     pawn: (coords, side, boardPieces) => {
         const range = initialPawnSetup.some(
             ({ q, r }) =>
                 coords.q === sideFactor[side] * q &&
-                coords.r === sideFactor[side] * r
+                coords.r === sideFactor[side] * r,
         )
             ? 2
             : 1;
@@ -168,7 +169,8 @@ const legalMoves: {
             };
             if (
                 !boardPieces.some(
-                    ({ coords }) => coords.q === field.q && coords.r === field.r
+                    ({ coords }) =>
+                        coords.q === field.q && coords.r === field.r,
                 )
             )
                 legalFields[idx] = field;
@@ -186,8 +188,8 @@ const legalMoves: {
                         otherPieceCoords.r === targetCoords.r
                         ? targetCoords
                         : undefined;
-                }
-            )
+                },
+            ),
         );
         return legalFields.concat(takableFields).filter(Boolean);
     },
@@ -197,5 +199,5 @@ export const getLegalMoves = (
     piece: Piece,
     side: BoardSide,
     coordinates: BoardCoordinates,
-    boardPieces: BoardPiece[]
+    boardPieces: BoardPiece[],
 ) => legalMoves[piece](coordinates, side, boardPieces);

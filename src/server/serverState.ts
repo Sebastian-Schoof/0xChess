@@ -112,5 +112,6 @@ export class ServerState {
                 this.games.get(gameId)?.connections[side]?.socket?.close(),
         );
         this.games.delete(gameId);
+        endGame(gameId);
     }
 }

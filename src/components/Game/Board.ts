@@ -23,7 +23,7 @@ function createHexagon(
         color,
         q,
         r,
-    }: { size: number; x: number; y: number; color: number } & BoardCoordinates
+    }: { size: number; x: number; y: number; color: number } & BoardCoordinates,
 ) {
     const width = Math.sqrt(3) * size;
     const height = 2 * size;
@@ -126,7 +126,7 @@ export class Board {
             Phaser.GameObjects.Components.Size &
             BoardCoordinates,
         q: number,
-        r: number
+        r: number,
     ) {
         const field = this.getField(q, r);
         if (!field) return;
@@ -141,7 +141,7 @@ export class Board {
         type: Piece,
         side: BoardSide,
         active: boolean,
-        { q, r }: { q: number; r: number }
+        { q, r }: { q: number; r: number },
     ) {
         piece.q = q;
         piece.r = r;
@@ -157,7 +157,7 @@ export class Board {
                     (pointer: Phaser.Input.Pointer, x: number, y: number) => {
                         piece.x = x;
                         piece.y = y;
-                    }
+                    },
                 )
                 .on(Phaser.Input.Events.DRAG_START, () => {
                     if (this.gameOver) return;
@@ -172,20 +172,12 @@ export class Board {
                             side: piece.side,
                             piece: piece.piece,
                             coords: { q: piece.q, r: piece.r },
-                        }))
+                        })),
                     );
-                    this.highlightedFields.forEach(({ q, r }) => {
-                        const field = this.getField(q, r);
-                        if (!field) return;
-                        field.fillColor = 0x00ff00;
-                    });
+                    this.colorizeHighlightedFields(0x00ff00);
                 })
                 .on(Phaser.Input.Events.DRAG_END, () => {
-                    this.highlightedFields.forEach(({ q, r }) => {
-                        const field = this.getField(q, r);
-                        if (!field) return;
-                        field.fillColor = field.defaultColor;
-                    });
+                    this.colorizeHighlightedFields();
                     this.highlightedFields = [];
                     this.placePiece(piece, piece.q, piece.r);
                 })
@@ -194,19 +186,19 @@ export class Board {
                     (pointer: Phaser.Input.Pointer, hexagon: Hexagon) => {
                         if (piece.q !== hexagon.q || piece.r !== hexagon.r)
                             hexagon.fillColor = 0x757575;
-                    }
+                    },
                 )
                 .on(
                     Phaser.Input.Events.DRAG_LEAVE,
                     (pointer: Phaser.Input.Pointer, hexagon: Hexagon) => {
                         hexagon.fillColor = this.highlightedFields.some(
                             (field) =>
-                                field.q === hexagon.q && field.r === hexagon.r
+                                field.q === hexagon.q && field.r === hexagon.r,
                         )
                             ? 0x00ff00
                             : hexagon.defaultColor;
                         hexagon.fillAlpha = 1;
-                    }
+                    },
                 )
                 .on(
                     Phaser.Input.Events.DROP,
@@ -218,14 +210,17 @@ export class Board {
                             !this.highlightedFields.some(
                                 (coord) =>
                                     coord.q === dropZone.q &&
-                                    coord.r === dropZone.r
+                                    coord.r === dropZone.r,
                             )
                         )
                             return;
                         this.lockMovement = true;
+                        this.colorizeHighlightedFields();
+                        this.highlightedFields = [];
                         const takenPiece = this.pieces.find(
                             (piece) =>
-                                piece.q === dropZone.q && piece.r === dropZone.r
+                                piece.q === dropZone.q &&
+                                piece.r === dropZone.r,
                         );
                         if (takenPiece?.piece === "king") {
                             this.gameOver = true;
@@ -235,8 +230,9 @@ export class Board {
                             piece.piece == "pawn" &&
                             promotionCoords.some(
                                 (coord) =>
-                                    coord.q * sideFactor[side] === dropZone.q &&
-                                    coord.r * sideFactor[side] === dropZone.r
+                                    coord.q * -sideFactor[side] ===
+                                        dropZone.q &&
+                                    coord.r * -sideFactor[side] === dropZone.r,
                             )
                         ) {
                             this.removePiece(piece.q, piece.r);
@@ -254,14 +250,14 @@ export class Board {
                                     });
                                     const boardPiece = this.scene.loadPiece(
                                         side,
-                                        newPiece
+                                        newPiece,
                                     );
                                     this.addPiece(
                                         boardPiece,
                                         newPiece,
                                         side,
                                         true,
-                                        { q: dropZone.q, r: dropZone.r }
+                                        { q: dropZone.q, r: dropZone.r },
                                     );
                                 },
                             };
@@ -272,7 +268,7 @@ export class Board {
                             });
                             this.placePiece(piece, dropZone.q, dropZone.r);
                         }
-                    }
+                    },
                 );
             this.scene.input.setDraggable(piece);
         }
@@ -282,7 +278,15 @@ export class Board {
     public removePiece(q: number, r: number) {
         this.pieces.find((piece) => piece.q === q && piece.r === r)?.destroy();
         this.pieces = this.pieces.filter(
-            (piece) => !(piece.q === q && piece.r === r)
+            (piece) => !(piece.q === q && piece.r === r),
         );
+    }
+
+    private colorizeHighlightedFields(color?: number) {
+        this.highlightedFields.forEach(({ q, r }) => {
+            const field = this.getField(q, r);
+            if (!field) return;
+            field.fillColor = color ?? field.defaultColor;
+        });
     }
 }

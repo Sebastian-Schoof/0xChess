@@ -1,5 +1,5 @@
 import { getLegalMoves, promotionCoords } from "game/Pieces";
-import { BoardSide, oppositeSide } from "game/types";
+import { BoardSide, oppositeSide, sideFactor } from "game/types";
 import { SessionStateManager } from "./sessionStateManager";
 import { SessionState } from "./types";
 import { updateGame } from "db/interface/games";
@@ -50,11 +50,14 @@ export class Gameplay implements SessionState {
             }
             const promotionPiece = move.promotion;
             const movedOntoPromotion = promotionCoords.some(
-                ({ q, r }) => q === move.to.q && r === move.to.r,
+                ({ q, r }) =>
+                    q * -sideFactor[this.side] === move.to.q &&
+                    r * -sideFactor[this.side] === move.to.r,
             );
+            const isPawn = movingPiece.piece === "pawn";
             if (
-                (promotionPiece && !movedOntoPromotion) ||
-                (movedOntoPromotion && !promotionPiece)
+                (promotionPiece && (!movedOntoPromotion || !isPawn)) ||
+                (isPawn && movedOntoPromotion && !promotionPiece)
             ) {
                 this.stateManager.serverState.closeGame(this.gameId!);
                 return;
