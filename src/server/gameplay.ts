@@ -24,18 +24,18 @@ export class Gameplay implements SessionState {
                 return;
             }
             game.state.toMove = oppositeSide[this.side];
-            const movingPieceRef = game.state.pieces.find(
+            const movingPiece = game.state.pieces.find(
                 (piece) =>
                     piece.side === this.side &&
                     piece.coords.q === move.from.q &&
                     piece.coords.r === move.from.r,
             );
-            if (!movingPieceRef) {
+            if (!movingPiece) {
                 this.stateManager.serverState.closeGame(this.gameId!);
                 return;
             }
             const legalMoves = getLegalMoves(
-                movingPieceRef.piece,
+                movingPiece.piece,
                 this.side,
                 move.from,
                 game.state.pieces,
@@ -59,8 +59,26 @@ export class Gameplay implements SessionState {
                 this.stateManager.serverState.closeGame(this.gameId!);
                 return;
             }
-            movingPieceRef.coords = move.to;
-            if (promotionPiece) movingPieceRef.piece = promotionPiece;
+            game.state.pieces = game.state.pieces
+                .filter(
+                    (piece) =>
+                        !(
+                            piece.coords.q === move.to.q &&
+                            piece.coords.r === move.to.r
+                        ),
+                )
+                .map((piece) =>
+                    piece.coords.q === move.from.q &&
+                    piece.coords.r === move.from.r
+                        ? {
+                              side: piece.side,
+                              coords: move.to,
+                              piece: promotionPiece
+                                  ? promotionPiece
+                                  : piece.piece,
+                          }
+                        : piece,
+                );
             game.connections[oppositeSide[this.side]]?.socket?.sendMessage({
                 move,
             });
