@@ -3,6 +3,7 @@ import { GameScene } from "./GameScene";
 import { PromotionDialog } from "./PromotionDialog";
 import { showDialog } from "./gamestate";
 import styles from "./styles.module.css";
+import { updateGame } from "db/interface/games";
 
 const canvasWidth = 1250;
 const canvasHeight = 1120;
@@ -26,19 +27,17 @@ export default function Game() {
         game.scale.autoCenter = 4;
 
         const updateZoom = () => {
-            const newScale =
-                Math.floor(
-                    Math.min(
-                        (ref.current?.getBoundingClientRect().width ??
-                            canvasWidth) / canvasWidth,
-                        (ref.current?.getBoundingClientRect().height ??
-                            canvasHeight) / canvasHeight
-                    )
-                ) || 0.5;
+            const newScale = Math.min(
+                (ref.current?.getBoundingClientRect().width ?? canvasWidth) /
+                    canvasWidth,
+                (ref.current?.getBoundingClientRect().height ?? canvasHeight) /
+                    canvasHeight,
+                1,
+            );
             game.scale.setZoom(newScale);
             setScale(newScale);
         };
-        updateZoom();
+
         window.addEventListener("resize", updateZoom);
         return () => window.removeEventListener("resize", updateZoom);
     }, []);

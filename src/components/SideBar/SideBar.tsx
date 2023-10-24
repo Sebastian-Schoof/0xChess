@@ -11,8 +11,10 @@ export default function SideBar({ onLeaveGame }: { onLeaveGame: () => void }) {
 
     return (
         <div className={styles.sideBar}>
-            <div>you play {state?.side}</div>
-            {statusMessage && <div>{statusMessage}</div>}
+            <div className={styles.messageConatiner}>
+                <div>you play {state?.side}</div>
+                {statusMessage && <div>{statusMessage}</div>}
+            </div>
             <div
                 className={componentStyles.button}
                 onClick={() => {

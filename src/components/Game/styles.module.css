@@ -1,8 +1,8 @@
 .game {
-    /* width: 100%; */
-    height: 100%;
     overflow: hidden;
     image-rendering: pixelated;
+    height: 100%;
+    width: 100%;
 }
 
 .promotionDialog {

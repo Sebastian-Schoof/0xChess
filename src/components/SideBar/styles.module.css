@@ -1,8 +1,26 @@
 .sideBar {
+    font-size: 2rem;
     display: flex;
-    flex-direction: column;
     gap: 20px;
+    min-width: 190px;
     border: 1px solid;
     border-radius: 12px;
-    padding: 10px;
+    padding: 24px;
+    justify-content: space-between;
+    @media (min-aspect-ratio: 1/1) {
+        flex-direction: column;
+        height: calc(100% - 60px);
+    };
+}
+
+.messageConatiner {
+    display: flex;
+    justify-content: space-between;
+    margin: auto;
+    div {margin: 0 16px;};
+    @media (min-aspect-ratio: 1/1) {
+        margin-top: 0;
+        flex-direction: column;
+        div {margin: 16px 0;}
+    };
 }
