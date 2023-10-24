@@ -20,21 +20,3 @@
 .friendCode {
     font-size: 4rem;
 }
-
-.input {
-    font-size: 2rem;
-    width: 200px;
-}
-
-.button {
-    border: 1px solid;
-    border-radius: 8px;
-    cursor: pointer;
-    user-select: none;
-    padding: 8px;
-    box-shadow: 2px 2px black;
-}
-.button:active {
-    box-shadow: none;
-    transform: translate(2px, 2px);
-}

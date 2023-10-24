@@ -1,5 +1,5 @@
 import { assetName, piecePaths } from "components/Game/assets";
-import { sceneInitiated, socket } from "components/signals";
+import { gameState, sceneInitiated, socket } from "components/signals";
 import { BoardPieceObject, BoardSide, Piece, oppositeSide } from "game/types";
 import Phaser from "phaser";
 import { Board } from "./Board";
@@ -36,7 +36,7 @@ export class GameScene extends Phaser.Scene {
         const newPiece = this.add.image(
             0,
             0,
-            assetName(side, piece)
+            assetName(side, piece),
         ) as BoardPieceObject;
         newPiece.setInteractive();
         this.input.setDraggable(newPiece);
@@ -53,13 +53,19 @@ export class GameScene extends Phaser.Scene {
             offsetY: 160,
             onMove: (move) => {
                 socket.value?.sendMessage({ move: move });
+                gameState.value = {
+                    side: this.side!,
+                    toMove: oppositeSide[this.side!],
+                };
             },
         });
 
         socket.value?.addMessageHandler("initialSetup", (data) => {
             this.side = data.side;
             board.lockMovement = this.side !== data.toMove;
-            alert("you will play " + this.side);
+            gameState.value = { side: data.side, toMove: data.toMove };
+            board.clear();
+            board.gameOver = false;
             data.pieces.forEach(({ side, piece, coords }) => {
                 const newPiece = this.loadPiece(side, piece);
                 board.addPiece(
@@ -67,13 +73,13 @@ export class GameScene extends Phaser.Scene {
                     piece,
                     side,
                     side === data.side,
-                    coords
+                    coords,
                 );
             });
         });
         socket.value?.addMessageHandler("move", (data) => {
             const takenPiece = board.pieces.find(
-                (piece) => piece.q === data.to.q && piece.r === data.to.r
+                (piece) => piece.q === data.to.q && piece.r === data.to.r,
             );
             if (takenPiece?.piece === "king") {
                 board.gameOver = true;
@@ -83,26 +89,27 @@ export class GameScene extends Phaser.Scene {
                 board.removePiece(data.from.q, data.from.r);
                 const newPiece = this.loadPiece(
                     oppositeSide[this.side!],
-                    data.promotion
+                    data.promotion,
                 );
                 board.addPiece(
                     newPiece,
                     data.promotion,
                     oppositeSide[this.side!],
                     false,
-                    data.to
+                    data.to,
                 );
             } else {
                 board.placePiece(
                     board.pieces.find(
                         (piece) =>
-                            piece.q === data.from.q && piece.r === data.from.r
+                            piece.q === data.from.q && piece.r === data.from.r,
                     )!,
                     data.to.q,
-                    data.to.r
+                    data.to.r,
                 );
             }
             board.lockMovement = false;
+            gameState.value = { side: this.side!, toMove: this.side! };
         });
 
         sceneInitiated.value = true;

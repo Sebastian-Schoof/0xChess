@@ -1,4 +1,5 @@
 import { socket } from "components/signals";
+import componentStyles from "components/styles.module.css";
 import { useRef, useState } from "preact/hooks";
 import styles from "./styles.module.css";
 
@@ -12,13 +13,13 @@ export default function Lobby() {
             ) : (
                 <>
                     <div
-                        className={styles.button}
+                        className={componentStyles.button}
                         onClick={() => setAskFriendCode(true)}
                     >
                         play friend
                     </div>
                     <div
-                        className={styles.button}
+                        className={componentStyles.button}
                         onClick={() => {
                             socket.value?.sendMessage({
                                 requestGame: "random",
@@ -48,12 +49,12 @@ function FriendCode() {
             ) : (
                 <>
                     <div
-                        className={styles.button}
+                        className={componentStyles.button}
                         style={{ alignSelf: "center" }}
                         onClick={() => {
                             socket.value?.addMessageHandler(
                                 "friendCode",
-                                setfriendCode
+                                setfriendCode,
                             );
                             socket.value?.sendMessage({
                                 requestGame: "friend",
@@ -64,12 +65,12 @@ function FriendCode() {
                     </div>
                     <div className={styles.joinArea}>
                         <input
-                            className={styles.input}
+                            className={componentStyles.input}
                             placeholder="friend code"
                             ref={inputRef}
                         />
                         <div
-                            className={styles.button}
+                            className={componentStyles.button}
                             onClick={() =>
                                 inputRef.current?.value &&
                                 socket.value?.sendMessage({

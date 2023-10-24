@@ -121,6 +121,14 @@ export class Board {
         return this.fields[selR]?.[selQ];
     }
 
+    private colorizeHighlightedFields(color?: number) {
+        this.highlightedFields.forEach(({ q, r }) => {
+            const field = this.getField(q, r);
+            if (!field) return;
+            field.fillColor = color ?? field.defaultColor;
+        });
+    }
+
     public placePiece(
         piece: Phaser.GameObjects.Components.Transform &
             Phaser.GameObjects.Components.Size &
@@ -282,11 +290,7 @@ export class Board {
         );
     }
 
-    private colorizeHighlightedFields(color?: number) {
-        this.highlightedFields.forEach(({ q, r }) => {
-            const field = this.getField(q, r);
-            if (!field) return;
-            field.fillColor = color ?? field.defaultColor;
-        });
+    public clear() {
+        this.pieces.forEach((piece) => this.removePiece(piece.q, piece.r));
     }
 }

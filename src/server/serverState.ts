@@ -107,10 +107,6 @@ export class ServerState {
     }
 
     closeGame(gameId: string) {
-        boardSides.forEach(
-            (side) =>
-                this.games.get(gameId)?.connections[side]?.socket?.close(),
-        );
         this.games.delete(gameId);
         endGame(gameId);
     }

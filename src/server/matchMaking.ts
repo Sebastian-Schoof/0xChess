@@ -1,4 +1,3 @@
-import { BoardSide } from "game/types";
 import { generateRandomCode } from "utils/random";
 import { SessionStateManager } from "./sessionStateManager";
 import { SessionState } from "./types";
@@ -22,23 +21,23 @@ export class Matchmaking implements SessionState {
             "requestGame",
             (opponent) => {
                 if (!this.stateManager.userId) return;
-                let gameInfo: readonly [BoardSide, string] | undefined =
-                    undefined;
                 switch (opponent) {
                     case "friend":
                         const friendCode = generateRandomCode(4);
                         this.stateManager.socket.sendMessage({ friendCode });
-                        gameInfo = this.stateManager.serverState.joinNewGame(
-                            this.stateManager.userId,
-                            this.stateManager.socket,
-                            friendCode,
-                        );
+                        var gameInfo =
+                            this.stateManager.serverState.joinNewGame(
+                                this.stateManager.userId,
+                                this.stateManager.socket,
+                                friendCode,
+                            );
                         break;
                     case "random":
-                        gameInfo = this.stateManager.serverState.joinNewGame(
-                            this.stateManager.userId,
-                            this.stateManager.socket,
-                        );
+                        var gameInfo =
+                            this.stateManager.serverState.joinNewGame(
+                                this.stateManager.userId,
+                                this.stateManager.socket,
+                            );
                         break;
                 }
                 this.stateManager.next(gameInfo);

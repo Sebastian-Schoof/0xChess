@@ -1,12 +1,13 @@
 import Game from "components/Game";
 import Lobby from "components/Lobby";
+import SideBar from "components/SideBar";
 import { useEffect, useState } from "preact/hooks";
-import { sceneInitiated, socket } from "./signals";
 import { openClientSocket } from "socketIO/socket";
+import { gameState, sceneInitiated, socket } from "./signals";
 import { generateIdentity } from "./utils";
 
 export function App() {
-    const [startGame, setStartGame] = useState(false);
+    const [gameRunning, setGameRunning] = useState(false);
 
     useEffect(() => {
         const clientSocket = openClientSocket(() => {
@@ -17,7 +18,21 @@ export function App() {
     useEffect(() => {
         if (socket.value?.state === WebSocket.OPEN && sceneInitiated.value) {
             socket.value.addMessageHandler("initialSetup", () => {
-                setStartGame(true);
+                setGameRunning(true);
+            });
+            socket.value.addMessageHandler("gameStatus", (status) => {
+                switch (status) {
+                    case "won":
+                    case "lost":
+                        gameState.value = {
+                            side: gameState.value!.side,
+                            gameState: status,
+                        };
+                        break;
+                    case "opponent quit":
+                        alert("you oppent quit. make of that what you will");
+                        break;
+                }
             });
             (async () => {
                 if (localStorage["identity"]) {
@@ -34,7 +49,15 @@ export function App() {
     return socket.value?.state === WebSocket.OPEN ? (
         <>
             <Game />
-            {!startGame && <Lobby />}
+            {gameRunning ? (
+                <SideBar
+                    onLeaveGame={() => {
+                        setGameRunning(false);
+                    }}
+                />
+            ) : (
+                <Lobby />
+            )}
         </>
     ) : (
         <>connecting to socket...</>

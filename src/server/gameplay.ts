@@ -1,8 +1,8 @@
+import { updateGame } from "db/interface/games";
 import { getLegalMoves, promotionCoords } from "game/Pieces";
 import { BoardSide, oppositeSide, sideFactor } from "game/types";
 import { SessionStateManager } from "./sessionStateManager";
 import { SessionState } from "./types";
-import { updateGame } from "db/interface/games";
 
 export class Gameplay implements SessionState {
     constructor(
@@ -30,7 +30,12 @@ export class Gameplay implements SessionState {
                     piece.coords.q === move.from.q &&
                     piece.coords.r === move.from.r,
             );
-            if (!movingPiece) {
+            const capturedPiece = game.state.pieces.find(
+                (piece) =>
+                    piece.coords.q === move.to.q &&
+                    piece.coords.r === move.to.r,
+            );
+            if (!movingPiece || capturedPiece?.side === this.side) {
                 this.stateManager.serverState.closeGame(this.gameId!);
                 return;
             }
@@ -85,8 +90,28 @@ export class Gameplay implements SessionState {
             game.connections[oppositeSide[this.side]]?.socket?.sendMessage({
                 move,
             });
-            updateGame(this.gameId, game.state.pieces);
-            //TODO: check for mate
+            if (capturedPiece?.piece === "king") {
+                game.connections[this.side]?.socket?.sendMessage({
+                    gameStatus: "won",
+                });
+                game.connections[oppositeSide[this.side]]?.socket?.sendMessage({
+                    gameStatus: "lost",
+                });
+                this.stateManager.serverState.closeGame(this.gameId);
+            } else updateGame(this.gameId, game.state.pieces);
+        });
+
+        this.stateManager.socket.addMessageHandler("gameStatus", (status) => {
+            switch (status) {
+                case "quit":
+                    const game = this.stateManager.serverState.getGameById(
+                        this.gameId!,
+                    );
+                    game?.connections[
+                        oppositeSide[this.side]
+                    ]?.socket?.sendMessage({ gameStatus: "opponent quit" });
+                    this.stateManager.next();
+            }
         });
 
         const joinedGame = this.stateManager.serverState.getGameById(
@@ -109,5 +134,6 @@ export class Gameplay implements SessionState {
                 this.stateManager.userId,
             );
         this.stateManager.socket.clearMessageHandler("move");
+        this.stateManager.socket.clearMessageHandler("gameStatus");
     }
 }
