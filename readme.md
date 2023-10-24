@@ -19,6 +19,7 @@ note however, that you need to host the frontend if you want to play in your loc
 ## what's next for this project?
 
 -   [ ] enable restraining diagonal movement
+-   [ ] enable mirrored starting positions
 -   [ ] enable randomised starting positions
 -   [ ] enable WeGo mechanic
 -   [ ] enable clock games
