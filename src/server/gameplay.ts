@@ -110,6 +110,7 @@ export class Gameplay implements SessionState {
                     game?.connections[
                         oppositeSide[this.side]
                     ]?.socket?.sendMessage({ gameStatus: "opponent quit" });
+                    this.stateManager.serverState.closeGame(this.gameId);
                     this.stateManager.next();
             }
         });
