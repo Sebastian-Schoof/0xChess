@@ -9,7 +9,7 @@
     justify-content: space-between;
     @media (min-aspect-ratio: 1/1) {
         flex-direction: column;
-        height: calc(100% - 74px);
+        height: calc(100% - 56px);
     };
 }
 

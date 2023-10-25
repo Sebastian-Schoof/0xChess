@@ -19,7 +19,7 @@ body {
     border-radius: 24px;
     height: calc(100% - 32px);
     max-height: 1240px;
-    width: calc(100% - 32px);
+    width: calc(100% - 24px);
     max-width: 1500px;
     background-color: white;
     @media (max-aspect-ratio: 1/1) {
