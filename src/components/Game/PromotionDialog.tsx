@@ -1,3 +1,4 @@
+import { gameScale } from "components/signals";
 import { BoardSide, Piece } from "game/types";
 import { piecePaths } from "./assets";
 import styles from "./styles.module.css";
@@ -7,22 +8,23 @@ const promotionPieces: Piece[] = ["knight", "bishop", "rook", "queen"];
 export function PromotionDialog({
     side,
     onClick,
-    scale = 1,
 }: {
     side: BoardSide;
     onClick: (piece: Piece) => void;
-    scale?: number;
 }) {
     return (
         <div
             className={styles.promotionDialog}
-            style={{ marginTop: `-${52 * scale}px` }}
+            style={{ marginTop: `-${52 * gameScale.value}px` }}
         >
             {promotionPieces.map((pieceName) => (
                 <img
                     key={pieceName}
                     src={piecePaths[side][pieceName as Piece]}
-                    style={{ cursor: "pointer", height: `${90 * scale}px` }}
+                    style={{
+                        cursor: "pointer",
+                        height: `${90 * gameScale.value}px`,
+                    }}
                     onClick={() => onClick(pieceName)}
                 />
             ))}

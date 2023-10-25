@@ -4,23 +4,36 @@ body {
     align-items: center;
     margin: 12px;
     height: calc(100vh - 24px);
+    width: calc(100vw - 24px);
     background-color: #383e42;
 }
 
 #app {
     display: flex;
+    margin: 0;
+    padding: 24px;
     gap: 16px;
     justify-content: center;
     align-items: center;
-    padding: 24px;
     border: 1px solid;
     border-radius: 24px;
-    height: 100%;
+    height: calc(100% - 32px);
     max-height: 1240px;
-    width: 100%;
+    width: calc(100% - 32px);
     max-width: 1500px;
     background-color: white;
     @media (max-aspect-ratio: 1/1) {
         flex-direction: column;
+    };
+    @media (max-width: 500px) {
+        display: none;
+    }
+}
+
+#rotateDevice {
+    display: none;
+    width: 50vw;
+    @media (max-width: 500px) {
+        display: block !important;
     }
 }

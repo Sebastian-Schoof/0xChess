@@ -5,6 +5,9 @@
 
 .button {
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: 1px solid;
     border-radius: 8px;
     cursor: pointer;

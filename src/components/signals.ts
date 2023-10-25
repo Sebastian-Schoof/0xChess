@@ -6,6 +6,10 @@ export const socket = signal<ClientSocket | undefined>(undefined);
 
 export const sceneInitiated = signal(false);
 
+export const game = signal<Phaser.Game | undefined>(undefined);
+
+export const gameScale = signal<number>(1);
+
 export const gameState = signal<
     | { side: BoardSide; toMove: BoardSide }
     | { side: BoardSide; gameState: "won" | "lost" }

@@ -1,5 +1,7 @@
+import { updateZoom } from "components/Game/utils";
 import { gameState, socket } from "components/signals";
 import componentStyles from "components/styles.module.css";
+import { useLayoutEffect } from "preact/hooks";
 import styles from "./styles.module.css";
 
 export default function SideBar({ onLeaveGame }: { onLeaveGame: () => void }) {
@@ -8,6 +10,8 @@ export default function SideBar({ onLeaveGame }: { onLeaveGame: () => void }) {
     let statusMessage: string | undefined = undefined;
     if (state && "toMove" in state) statusMessage = `${state.toMove} to move`;
     if (state && "gameState" in state) statusMessage = `you ${state.gameState}`;
+
+    useLayoutEffect(updateZoom, []);
 
     return (
         <div className={styles.sideBar}>
