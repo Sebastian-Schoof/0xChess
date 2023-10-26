@@ -3,8 +3,8 @@ body {
     justify-content: center;
     align-items: center;
     margin: 12px;
-    height: calc(100vh - 24px);
-    width: calc(100vw - 24px);
+    height: calc(100vh - 25px);
+    width: calc(100vw - 25px);
     background-color: #383e42;
 }
 
