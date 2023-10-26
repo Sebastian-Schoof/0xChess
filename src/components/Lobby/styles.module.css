@@ -20,3 +20,11 @@
 .friendCode {
     font-size: 4rem;
 }
+
+.backButton {
+    position: absolute;
+    cursor: pointer;
+    top: 16px;
+    left: 16px;
+    width: 36px;
+}

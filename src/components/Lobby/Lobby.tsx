@@ -2,6 +2,7 @@ import { styles as componentStyles } from "components/general";
 import { socket } from "components/signals";
 import { useRef, useState } from "preact/hooks";
 import styles from "./styles.module.css";
+import BackButton from "/assets/back.svg";
 
 export default function Lobby() {
     const [askFriendCode, setAskFriendCode] = useState(false);
@@ -9,7 +10,11 @@ export default function Lobby() {
     return (
         <dialog className={styles.lobby}>
             {askFriendCode ? (
-                <FriendCode />
+                <FriendCode
+                    navigateBack={() => {
+                        setAskFriendCode(false);
+                    }}
+                />
             ) : (
                 <>
                     <div
@@ -34,8 +39,7 @@ export default function Lobby() {
     );
 }
 
-//TODO: add back button
-function FriendCode() {
+function FriendCode({ navigateBack }: { navigateBack: () => void }) {
     const [friendCode, setfriendCode] = useState<string | undefined>(undefined);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -48,6 +52,11 @@ function FriendCode() {
                 </>
             ) : (
                 <>
+                    <img
+                        src={BackButton}
+                        className={styles.backButton}
+                        onClick={navigateBack}
+                    />
                     <div
                         className={componentStyles.button}
                         style={{ alignSelf: "center" }}
