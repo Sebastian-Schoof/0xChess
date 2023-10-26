@@ -1,5 +1,5 @@
+import { styles as componentStyles } from "components/general";
 import { socket } from "components/signals";
-import componentStyles from "components/styles.module.css";
 import { useRef, useState } from "preact/hooks";
 import styles from "./styles.module.css";
 

@@ -4,6 +4,8 @@ import { ClientSocket } from "socketIO/socket";
 
 export const socket = signal<ClientSocket | undefined>(undefined);
 
+export const sendNotifications = signal(false);
+
 export const sceneInitiated = signal(false);
 
 export const game = signal<Phaser.Game | undefined>(undefined);
