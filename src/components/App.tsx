@@ -1,5 +1,6 @@
 import Game from "components/Game";
 import Lobby from "components/Lobby";
+import Message from "components/Message";
 import SideBar from "components/SideBar";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { openClientSocket } from "socketIO/socket";
@@ -8,6 +9,7 @@ import {
     sceneInitiated,
     sendNotifications,
     socket,
+    socketConnectionStatus,
 } from "./signals";
 import { generateIdentity } from "./utils";
 import Icon from "/assets/Chess_plt45.svg";
@@ -18,52 +20,67 @@ export function App() {
     const titleInterval = useRef<NodeJS.Timer>();
 
     useEffect(() => {
-        const clientSocket = openClientSocket(() => {
-            socket.value = clientSocket;
+        document.addEventListener("visibilitychange", () => {
+            clearInterval(titleInterval.current);
+            document.title = "0xChess";
         });
         sendNotifications.value =
             localStorage["sendNotifications"] === "true" || false;
+
+        const clientSocket = openClientSocket(() => {
+            socketConnectionStatus.value = WebSocket.OPEN;
+        });
+        clientSocket.addMessageHandler("initialSetup", () => {
+            setGameRunning(true);
+        });
+        clientSocket.addMessageHandler("move", () => {
+            if (document.visibilityState !== "visible") {
+                document.title = "your move";
+                titleInterval.current = setInterval(() => {
+                    document.title =
+                        "your move" +
+                        new Array(docTitleRot.current).fill(".").join("");
+                    docTitleRot.current = (docTitleRot.current + 1) % 4;
+                }, 1000);
+                if (
+                    sendNotifications.value &&
+                    Notification?.permission === "granted"
+                )
+                    new Notification("your move", { icon: Icon });
+            }
+        });
+        clientSocket.addMessageHandler("gameStatus", (status) => {
+            switch (status) {
+                case "won":
+                case "lost":
+                    gameState.value = {
+                        side: gameState.value!.side,
+                        gameState: status,
+                    };
+                    break;
+                case "opponent quit":
+                    alert("you oppent quit. make of that what you will");
+                    break;
+            }
+        });
+
+        clientSocket.addCloseHandler(() => {
+            socketConnectionStatus.value = WebSocket.CLOSED;
+            const reconnect = setInterval(() => {
+                if (socketConnectionStatus.value === WebSocket.OPEN)
+                    clearInterval(reconnect);
+                else clientSocket.connect();
+            }, 5000);
+        });
+
+        socket.value = clientSocket;
     }, []);
 
     useEffect(() => {
-        if (socket.value?.state === WebSocket.OPEN && sceneInitiated.value) {
-            socket.value.addMessageHandler("initialSetup", () => {
-                setGameRunning(true);
-            });
-            socket.value.addMessageHandler("move", () => {
-                if (document.visibilityState !== "visible") {
-                    document.title = "your move";
-                    titleInterval.current = setInterval(() => {
-                        document.title =
-                            "your move" +
-                            new Array(docTitleRot.current).fill(".").join("");
-                        docTitleRot.current = (docTitleRot.current + 1) % 4;
-                    }, 1000);
-                    if (
-                        sendNotifications.value &&
-                        Notification?.permission === "granted"
-                    )
-                        new Notification("your move", { icon: Icon });
-                }
-            });
-            document.addEventListener("visibilitychange", () => {
-                clearInterval(titleInterval.current);
-                document.title = "0xChess";
-            });
-            socket.value.addMessageHandler("gameStatus", (status) => {
-                switch (status) {
-                    case "won":
-                    case "lost":
-                        gameState.value = {
-                            side: gameState.value!.side,
-                            gameState: status,
-                        };
-                        break;
-                    case "opponent quit":
-                        alert("you oppent quit. make of that what you will");
-                        break;
-                }
-            });
+        if (
+            socketConnectionStatus.value === WebSocket.OPEN &&
+            sceneInitiated.value
+        ) {
             (async () => {
                 if (localStorage["identity"]) {
                     var identity = localStorage["identity"] as string;
@@ -74,22 +91,24 @@ export function App() {
                 socket.value?.sendMessage({ identity });
             })();
         }
-    }, [socket.value?.state, sceneInitiated.value]);
+    }, [socketConnectionStatus.value, sceneInitiated.value]);
 
-    return socket.value?.state === WebSocket.OPEN ? (
+    return (
         <>
             <Game />
-            {gameRunning ? (
-                <SideBar
-                    onLeaveGame={() => {
-                        setGameRunning(false);
-                    }}
-                />
+            {socketConnectionStatus.value === WebSocket.OPEN ? (
+                gameRunning ? (
+                    <SideBar
+                        onLeaveGame={() => {
+                            setGameRunning(false);
+                        }}
+                    />
+                ) : (
+                    <Lobby />
+                )
             ) : (
-                <Lobby />
+                <Message text="connecting to socket..." />
             )}
         </>
-    ) : (
-        <>connecting to socket...</>
     );
 }
