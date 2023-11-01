@@ -2,11 +2,6 @@
 
 chess on a hexagonal board that is not patented
 
-## where can I play?
-
-this version is not hosted yet.
-IOU a deployment for 100 stars :)
-
 ## how can I get up and running locally?
 
 ```
