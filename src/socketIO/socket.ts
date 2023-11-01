@@ -126,8 +126,8 @@ export type ClientSocket = Socket<ClientSocketMessage, ServerSocketMessage>;
 export const openClientSocket = (onOpen: () => void) =>
     new Socket({
         type: "client",
-        address: `ws://${window.location.hostname}:${
-            process.env.PORT ?? defaultPort
-        }`,
+        address: `${window.location.protocol === "https:" ? "wss" : "ws"}://${
+            window.location.hostname
+        }:${process.env.PORT ?? defaultPort}`,
         onOpen,
     }) as ClientSocket;

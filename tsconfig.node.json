@@ -1,10 +1,29 @@
 {
     "compilerOptions": {
-        "composite": true,
+        "target": "ESNext",
+        "useDefineForClassFields": true,
+        "module": "CommonJS",
+        "esModuleInterop": true,
+        "lib": ["ESNext", "DOM", "DOM.Iterable"],
         "skipLibCheck": true,
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "allowSyntheticDefaultImports": true
+
+        /* Linting */
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+
+        "baseUrl": "src",
+        "paths": {
+            "game/*": ["game/*"],
+            "socketIO/*": ["socketIO/*"]
+        },
+        "outDir": "build",
     },
-    "include": ["vite.config.ts"]
+    "include": ["src"],
+    "exclude": ["src/components", "src/**/*.tsx"],
+
+    "ts-node": {
+        "require": ["tsconfig-paths/register"]
+    }
 }

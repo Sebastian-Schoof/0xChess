@@ -5,5 +5,6 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    css: { modules: { localsConvention: "camelCaseOnly" } },
     plugins: [preact(), tsconfigPaths(), EnvironmentPlugin({ PORT: null })],
 });

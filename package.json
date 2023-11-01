@@ -5,8 +5,10 @@
     "scripts": {
         "start": "concurrently 'npm:dev' 'npm:serve'",
         "dev": "vite",
-        "serve": "nodemon src/server.ts",
-        "build": "tsc && vite build",
+        "serve": "nodemon --exec 'ts-node --project tsconfig.node.json' src/server.ts",
+        "build": "concurrently 'npm:build:frontend' 'npm:build:backend'",
+        "build:frontend": "tsc && vite build",
+        "build:backend": "tsc --project tsconfig.node.json && tsc-alias -p tsconfig.node.json",
         "preview": "vite preview",
         "db": "touch games.db && ts-node src/db/scripts/execute.ts"
     },
@@ -26,6 +28,7 @@
         "prettier": "^3.0.3",
         "sass": "^1.62.1",
         "ts-node": "^10.9.1",
+        "tsc-alias": "^1.8.8",
         "tsconfig-paths": "^4.2.0",
         "typescript": "^5.1.6",
         "vite": "^4.3.2",
