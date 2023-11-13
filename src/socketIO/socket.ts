@@ -113,8 +113,23 @@ export type ServerSocket = Socket<ServerSocketMessage, ClientSocketMessage>;
 export function openServerSocket(
     onConnect: (ws: Socket<ServerSocketMessage, ClientSocketMessage>) => void,
 ) {
+    const server = process.env.certFolder
+        ? (() => {
+              const { readFileSync } = require("fs");
+              const { createServer } = require("https");
+              const { join } = require("path");
+              return createServer({
+                  cert: readFileSync(
+                      join(process.env.certFolder, "certificate.pem"),
+                  ),
+                  key: readFileSync(join(process.env.certFolder, "key.pem")),
+              });
+          })()
+        : undefined;
+
     const wss = new WS.Server({
         port: +process.env.PORT! || defaultPort,
+        server,
     });
     wss.on("connection", (ws) =>
         onConnect(new Socket({ type: "server", connection: ws })),
