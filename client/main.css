@@ -1,0 +1,39 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 12px;
+    height: calc(100vh - 25px);
+    width: calc(100vw - 25px);
+    background-color: #383e42;
+}
+
+#app {
+    display: flex;
+    margin: 0;
+    padding: 24px;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid;
+    border-radius: 24px;
+    height: calc(100% - 32px);
+    max-height: 1240px;
+    width: calc(100% - 24px);
+    max-width: 1500px;
+    background-color: white;
+    @media (max-aspect-ratio: 1/1) {
+        flex-direction: column;
+    }
+    @media (max-width: 500px) {
+        display: none;
+    }
+}
+
+#rotateDevice {
+    display: none;
+    width: 50vw;
+    @media (max-width: 500px) {
+        display: block !important;
+    }
+}

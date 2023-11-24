@@ -4,13 +4,13 @@
     "version": "0.0.0",
     "scripts": {
         "start": "concurrently 'npm:dev' 'npm:serve'",
-        "dev": "vite",
-        "serve": "nodemon --exec 'ts-node --project tsconfig.node.json' src/server.ts",
+        "start:frontend": "vite -c client/vite.config.ts",
+        "start:backend": "nodemon --exec 'ts-node --project server/tsconfig.json' server/main.ts",
         "build": "concurrently 'npm:build:frontend' 'npm:build:backend'",
-        "build:frontend": "tsc && vite build",
-        "build:backend": "tsc --project tsconfig.node.json && tsc-alias -p tsconfig.node.json",
+        "build:frontend": "tsc --project client/tsconfig.json && vite build -c client/vite.config.ts",
+        "build:backend": "tsc --project server/tsconfig.json && tsc-alias -p server/tsconfig.json && cp server/db/scripts/*.sql build/server/db/scripts/",
         "preview": "vite preview",
-        "db": "touch games.db && ts-node src/db/scripts/execute.ts"
+        "db": "touch games.db && ts-node --project server/tsconfig.json server/db/scripts/execute.ts"
     },
     "dependencies": {
         "@preact/signals": "^1.1.3",

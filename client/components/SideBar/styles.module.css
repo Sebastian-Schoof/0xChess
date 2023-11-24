@@ -1,0 +1,55 @@
+.sideBar {
+    font-size: 2rem;
+    display: flex;
+    gap: 24px;
+    min-width: 200px;
+    border: 1px solid;
+    border-radius: 12px;
+    padding: 24px;
+    justify-content: space-between;
+    @media (min-aspect-ratio: 1/1) {
+        flex-direction: column;
+        height: calc(100% - 56px);
+    }
+}
+
+.settingsIcon {
+    height: 72px;
+    cursor: pointer;
+    @media (min-aspect-ratio: 1/1) {
+        display: flex;
+        align-self: flex-end;
+    }
+}
+
+.active {
+    background-color: #ccc;
+    border-radius: 100px;
+}
+
+.messageConatiner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    @media (min-aspect-ratio: 1/1) {
+        margin-top: 0;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.settingsDialog {
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    justify-content: space-between;
+    background-color: white;
+    border: 1px solid;
+    border-radius: 12px;
+    font-size: 1.6rem;
+    align-items: center;
+    user-select: none;
+    padding-top: 36px;
+}
