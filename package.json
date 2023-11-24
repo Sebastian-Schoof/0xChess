@@ -3,7 +3,7 @@
     "private": true,
     "version": "0.0.0",
     "scripts": {
-        "start": "concurrently 'npm:dev' 'npm:serve'",
+        "start": "concurrently 'npm:start:frontend' 'npm:start:backend'",
         "start:frontend": "vite -c client/vite.config.ts",
         "start:backend": "nodemon --exec 'ts-node --project server/tsconfig.json' server/main.ts",
         "build": "concurrently 'npm:build:frontend' 'npm:build:backend'",
