@@ -122,7 +122,7 @@ export class Board {
         return this.fields[selR]?.[selQ];
     }
 
-    private colorizeHighlightedFields(color?: number) {
+    public colorizeHighlightedFields(color?: number) {
         this.highlightedFields.forEach(({ q, r }) => {
             const field = this.getField(q, r);
             if (!field) return;
@@ -170,6 +170,7 @@ export class Board {
                 )
                 .on(Phaser.Input.Events.DRAG_START, () => {
                     if (this.gameOver) return;
+                    this.colorizeHighlightedFields();
                     this.highlightedFields = getLegalMoves(
                         type,
                         side,

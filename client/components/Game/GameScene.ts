@@ -90,6 +90,8 @@ export class GameScene extends Phaser.Scene {
                 board.gameOver = true;
             }
             board.removePiece(data.to.q, data.to.r);
+            board.highlightedFields = [data.from, data.to];
+            board.colorizeHighlightedFields(0x00ff00);
             if (data.promotion) {
                 board.removePiece(data.from.q, data.from.r);
                 const newPiece = this.loadPiece(
