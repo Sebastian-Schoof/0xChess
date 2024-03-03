@@ -17,7 +17,7 @@ import { generateIdentity } from "./utils";
 export default function App() {
     const [gameRunning, setGameRunning] = useState(false);
     const docTitleRot = useRef<number>(0);
-    const titleInterval = useRef<NodeJS.Timer>();
+    const titleInterval = useRef<Timer>();
 
     useEffect(() => {
         document.addEventListener("visibilitychange", () => {
