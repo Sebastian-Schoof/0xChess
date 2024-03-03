@@ -5,7 +5,7 @@ chess on a hexagonal board that is not patented
 ## how can I get up and running locally?
 
 ```
-npm i && npm start
+bun i && bun start
 ```
 
 note however, that you need to host the frontend if you want to play in your local network
@@ -28,7 +28,4 @@ if the technical side of this project tickles your fancy, here are some things I
 -   use zustand instead of shoving preacts signals around
     -   the subscriptions would have probably played nicer with phaser
     -   would have lead to less duplications of state in phaser vs preact
--   use deno instead of node when doing a backend
-    -   especially esmodules vs ts-node was a pain to "work" with
-    -   typescript is native to deno
 -   having "type safe" sockets might not be worth having an unholy wrapper for client and server sockets
