@@ -37,6 +37,7 @@ function createHexagon(
     ]);
     const hexagon = scene.add
         .polygon(x, y, geom.points, color)
+        .setStrokeStyle(2)
         .setInteractive(geom, Phaser.Geom.Polygon.Contains, true) as Hexagon;
     hexagon.q = q;
     hexagon.r = r;
