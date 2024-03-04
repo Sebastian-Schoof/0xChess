@@ -120,9 +120,11 @@ export function openServerSocket(
               const { join } = require("path");
               return createServer({
                   cert: readFileSync(
-                      join(process.env.certFolder, "certificate.pem"),
+                      join(process.env.certFolder, "fullchain.pem"),
                   ),
-                  key: readFileSync(join(process.env.certFolder, "key.pem")),
+                  key: readFileSync(
+                      join(process.env.certFolder, "privkey.pem"),
+                  ),
               });
           })()
         : undefined;
