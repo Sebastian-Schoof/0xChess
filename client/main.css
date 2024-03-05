@@ -10,6 +10,7 @@ body {
 
 #app {
     display: flex;
+    position: relative;
     margin: 0;
     padding: 24px;
     gap: 16px;

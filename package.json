@@ -1,7 +1,7 @@
 {
     "name": "0xChess",
     "private": true,
-    "version": "0.0.0",
+    "version": "0.1.0",
     "scripts": {
         "client:start": "bunx --bun vite -c client/vite.config.ts",
         "client:build": "bunx --bun tsc --project client/tsconfig.json && bunx --bun vite build -c client/vite.config.ts",

@@ -1,6 +1,6 @@
 import { styles as componentStyles } from "components/general";
-import { socket } from "signals";
 import { useRef, useState } from "preact/hooks";
+import { socket } from "signals";
 import styles from "./styles.module.css";
 import BackButton from "/assets/back.svg";
 

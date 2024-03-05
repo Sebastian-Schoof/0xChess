@@ -1,9 +1,10 @@
+import { repositoryURL } from "common/socketIO/const";
+import { openClientSocket } from "common/socketIO/socket";
 import Game from "components/Game";
 import Lobby from "components/Lobby";
 import Message from "components/Message";
 import SideBar from "components/SideBar";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { openClientSocket } from "common/socketIO/socket";
 import {
     gameState,
     sceneInitiated,
@@ -11,8 +12,18 @@ import {
     socket,
     socketConnectionStatus,
 } from "signals";
-import Icon from "/assets/Chess_plt45.svg";
+import styles from "./styles.module.css";
 import { generateIdentity } from "./utils";
+import Icon from "/assets/Chess_plt45.svg";
+import GithubLogo from "/assets/github.svg";
+
+const GithubLink = () => (
+    <img
+        src={GithubLogo}
+        className={styles.githubLogo}
+        onClick={() => window.open(repositoryURL)}
+    />
+);
 
 export default function App() {
     const [gameRunning, setGameRunning] = useState(false);
@@ -104,10 +115,16 @@ export default function App() {
                         }}
                     />
                 ) : (
-                    <Lobby />
+                    <>
+                        <Lobby />
+                        <GithubLink />
+                    </>
                 )
             ) : (
-                <Message text="connecting to socket..." />
+                <>
+                    <Message text="connecting to socket..." />
+                    <GithubLink />
+                </>
             )}
         </>
     );

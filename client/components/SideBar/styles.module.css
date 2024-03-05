@@ -13,13 +13,31 @@
     }
 }
 
+.iconContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 8px;
+    .githubIcon {
+        margin-left: unset;
+    }
+    @media (min-aspect-ratio: 1/1) {
+        flex-direction: row;
+    .githubIcon {
+        margin-left: 12px;
+    }
+    }
+}
+
+.githubIcon {
+    height: 48px;
+    cursor: pointer;
+}
+
 .settingsIcon {
     height: 72px;
     cursor: pointer;
-    @media (min-aspect-ratio: 1/1) {
-        display: flex;
-        align-self: flex-end;
-    }
 }
 
 .active {
