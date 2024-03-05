@@ -113,12 +113,12 @@ export type ServerSocket = Socket<ServerSocketMessage, ClientSocketMessage>;
 export function openServerSocket(
     onConnect: (ws: Socket<ServerSocketMessage, ClientSocketMessage>) => void,
 ) {
-    const server = process.env.certFolder
+    const wss = process.env.certFolder
         ? (() => {
               const { readFileSync } = require("fs");
               const { createServer } = require("https");
               const { join } = require("path");
-              return createServer({
+              const server = createServer({
                   cert: readFileSync(
                       join(process.env.certFolder, "fullchain.pem"),
                   ),
@@ -126,13 +126,17 @@ export function openServerSocket(
                       join(process.env.certFolder, "privkey.pem"),
                   ),
               });
+              const wss = new WS.Server({
+                  port: server ? undefined : +process.env.PORT! || defaultPort,
+                  server,
+              });
+              server.listen(+process.env.PORT! || defaultPort);
+              return wss;
           })()
-        : undefined;
+        : new WS.Server({
+              port: +process.env.PORT! || defaultPort,
+          });
 
-    const wss = new WS.Server({
-        port: +process.env.PORT! || defaultPort,
-        server,
-    });
     wss.on("connection", (ws) =>
         onConnect(new Socket({ type: "server", connection: ws })),
     );
