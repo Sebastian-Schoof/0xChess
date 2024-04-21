@@ -53,7 +53,7 @@ const getGameByUserIdQuery = db.prepare(`
 type GetGameByUserIdQueryParams = { $userId: string };
 type GetGameByUserIdQueryReturnGameColumn = {
     gameId: string;
-    boardState: Buffer;
+    boardState: Uint8Array;
     toMove: number;
     userId: null;
     side: null;
@@ -79,7 +79,7 @@ const updateGameQuery = db.prepare(`
     where
         id = $gameId;
 `);
-type UpdateGameQueryParams = { $gameId: string; $boardState: Buffer };
+type UpdateGameQueryParams = { $gameId: string; $boardState: Uint8Array };
 
 const endGameQueryStatements = [
     "delete from gameUsers where gameId = $gameId;",
@@ -92,6 +92,9 @@ const endGameQueryTransaction = db.transaction(
             statement.run(gameDetails),
         ),
 );
+
+const blobEncoder = new TextEncoder();
+const blobDecoder = new TextDecoder();
 
 export function createGame(
     id: string,
@@ -129,7 +132,9 @@ export function getGameByUserId(userId: string) {
                       [key in BoardSide]: { userId: string };
                   },
                   state: {
-                      pieces: JSON.parse(dbValues[0].boardState.toString()),
+                      pieces: JSON.parse(
+                          blobDecoder.decode(dbValues[0].boardState),
+                      ),
                       toMove: (dbValues[0].toMove === 0
                           ? "white"
                           : "black") as BoardSide,
@@ -142,7 +147,7 @@ export function getGameByUserId(userId: string) {
 export function updateGame(gameId: string, boardState: BoardPiece[]) {
     const params: UpdateGameQueryParams = {
         $gameId: gameId,
-        $boardState: Buffer.from(JSON.stringify(boardState)),
+        $boardState: blobEncoder.encode(JSON.stringify(boardState)),
     };
     updateGameQuery.run(params);
 }
