@@ -9,7 +9,6 @@ export class Gameplay implements SessionState {
         private stateManager: SessionStateManager,
         private side: BoardSide,
         private gameId: string,
-        private delaySetup?: boolean,
     ) {}
 
     enter() {
@@ -119,24 +118,13 @@ export class Gameplay implements SessionState {
         const joinedGame = this.stateManager.serverState.getGameById(
             this.gameId,
         )!;
-        if (!this.delaySetup) {
-            this.stateManager.socket.sendMessage({
-                initialSetup: {
-                    side: this.side,
-                    pieces: joinedGame.state.pieces,
-                    toMove: joinedGame.state.toMove,
-                },
-            });
-            joinedGame?.connections[
-                oppositeSide[this.side]
-            ]?.socket?.sendMessage({
-                initialSetup: {
-                    side: oppositeSide[this.side],
-                    pieces: joinedGame.state.pieces,
-                    toMove: joinedGame.state.toMove,
-                },
-            });
-        }
+        this.stateManager.socket.sendMessage({
+            initialSetup: {
+                side: this.side,
+                pieces: joinedGame.state.pieces,
+                toMove: joinedGame.state.toMove,
+            },
+        });
     }
 
     leave() {

@@ -19,13 +19,10 @@ export class SessionStateManager {
         this.activeState.enter();
     }
 
-    next(
-        gameInfo?: readonly [side: BoardSide, gameId: string],
-        delaySetup?: boolean,
-    ) {
+    next(gameInfo?: readonly [side: BoardSide, gameId: string]) {
         this.activeState.leave();
         this.activeState = gameInfo
-            ? new Gameplay(this, ...gameInfo, delaySetup)
+            ? new Gameplay(this, ...gameInfo)
             : new Matchmaking(this);
         this.activeState.enter();
     }

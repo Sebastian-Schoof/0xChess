@@ -27,6 +27,7 @@ const GithubLink = () => (
 
 export default function App() {
     const [gameRunning, setGameRunning] = useState(false);
+    const [waitingForLobby, setWaitingForLobby] = useState(false);
     const docTitleRot = useRef<number>(0);
     const titleInterval = useRef<Timer>();
 
@@ -108,7 +109,7 @@ export default function App() {
         <>
             <Game />
             {socketConnectionStatus.value === WebSocket.OPEN ? (
-                gameRunning ? (
+                gameRunning && !waitingForLobby ? (
                     <SideBar
                         onLeaveGame={() => {
                             setGameRunning(false);
@@ -116,7 +117,7 @@ export default function App() {
                     />
                 ) : (
                     <>
-                        <Lobby />
+                        <Lobby setKeepOpen={setWaitingForLobby} />
                         <GithubLink />
                     </>
                 )

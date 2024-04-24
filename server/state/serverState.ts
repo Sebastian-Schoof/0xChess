@@ -54,12 +54,7 @@ export class ServerState {
             : null;
     }
 
-    joinNewGame(
-        userId: string,
-        socket: ServerSocket,
-        code?: string,
-        delaySetup?: boolean,
-    ) {
+    joinNewGame(userId: string, socket: ServerSocket, code?: string) {
         for (let [gameId, game] of this.games) {
             if (game.code !== code) continue;
             for (let side of boardSides)
