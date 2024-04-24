@@ -31,6 +31,7 @@ export class Matchmaking implements SessionState {
                                 this.stateManager.socket,
                                 friendCode,
                             );
+                        this.stateManager.next(gameInfo, true);
                         break;
                     case "random":
                         var gameInfo =
@@ -38,9 +39,9 @@ export class Matchmaking implements SessionState {
                                 this.stateManager.userId,
                                 this.stateManager.socket,
                             );
+                        this.stateManager.next(gameInfo);
                         break;
                 }
-                this.stateManager.next(gameInfo);
             },
         );
         this.stateManager.socket.addMessageHandler("joinGame", (friendCode) => {
