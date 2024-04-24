@@ -293,6 +293,8 @@ export class Board {
     }
 
     public clear() {
+        this.colorizeHighlightedFields();
+        this.highlightedFields = [];
         this.pieces.forEach((piece) => this.removePiece(piece.q, piece.r));
     }
 }
