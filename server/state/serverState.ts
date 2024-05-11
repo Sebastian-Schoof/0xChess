@@ -97,13 +97,6 @@ export class ServerState {
             connection.socket?.close();
             connection.socket = undefined;
         }
-
-        if (
-            !boardSides.some(
-                (side) => this.games.get(gameId)?.connections[side]?.socket,
-            )
-        )
-            endGame(gameId);
     }
 
     closeGame(gameId: string) {
