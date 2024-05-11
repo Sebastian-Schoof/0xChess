@@ -65,6 +65,7 @@ export default function App() {
             switch (status) {
                 case "won":
                 case "lost":
+                case "drew":
                     gameState.value = {
                         side: gameState.value!.side,
                         gameState: status,

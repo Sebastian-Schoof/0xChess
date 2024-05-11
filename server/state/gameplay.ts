@@ -1,4 +1,10 @@
-import { getLegalMoves, promotionCoords } from "common/game/Pieces";
+import {
+    getLegalMoves,
+    isInCheck,
+    movePiece,
+    promotionCoords,
+} from "common/game/Pieces";
+import { boardSize } from "common/game/const";
 import { BoardSide, oppositeSide, sideFactor } from "common/game/types";
 import { updateGame } from "db/interface/games";
 import { SessionStateManager } from "./sessionStateManager";
@@ -35,7 +41,11 @@ export class Gameplay implements SessionState {
                     piece.coords.q === move.to.q &&
                     piece.coords.r === move.to.r,
             );
-            if (!movingPiece || capturedPiece?.side === this.side) {
+            if (
+                !movingPiece ||
+                capturedPiece?.side === this.side ||
+                capturedPiece?.piece === "king"
+            ) {
                 this.stateManager.serverState.closeGame(this.gameId!);
                 return;
             }
@@ -44,6 +54,7 @@ export class Gameplay implements SessionState {
                 this.side,
                 move.from,
                 game.state.pieces,
+                boardSize,
             );
             if (
                 !legalMoves.some(
@@ -67,30 +78,33 @@ export class Gameplay implements SessionState {
                 this.stateManager.serverState.closeGame(this.gameId!);
                 return;
             }
-            game.state.pieces = game.state.pieces
-                .filter(
-                    (piece) =>
-                        !(
-                            piece.coords.q === move.to.q &&
-                            piece.coords.r === move.to.r
-                        ),
-                )
-                .map((piece) =>
-                    piece.coords.q === move.from.q &&
-                    piece.coords.r === move.from.r
-                        ? {
-                              side: piece.side,
-                              coords: move.to,
-                              piece: promotionPiece
-                                  ? promotionPiece
-                                  : piece.piece,
-                          }
-                        : piece,
-                );
+            game.state.pieces = movePiece(move, game.state.pieces);
             game.connections[oppositeSide[this.side]]?.socket?.sendMessage({
                 move,
             });
-            if (capturedPiece?.piece === "king") {
+            if (game.state.pieces.length <= 2) {
+                game.connections[this.side]?.socket?.sendMessage({
+                    gameStatus: "drew",
+                });
+                game.connections[oppositeSide[this.side]]?.socket?.sendMessage({
+                    gameStatus: "drew",
+                });
+                this.stateManager.serverState.closeGame(this.gameId);
+            } else if (
+                isInCheck(oppositeSide[this.side], game.state.pieces) &&
+                !game.state.pieces
+                    .filter((piece) => piece.side === oppositeSide[this.side])
+                    .some(
+                        (piece) =>
+                            getLegalMoves(
+                                piece.piece,
+                                oppositeSide[this.side],
+                                piece.coords,
+                                game.state.pieces,
+                                boardSize,
+                            ).length,
+                    )
+            ) {
                 game.connections[this.side]?.socket?.sendMessage({
                     gameStatus: "won",
                 });

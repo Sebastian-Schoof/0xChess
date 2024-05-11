@@ -9,6 +9,7 @@ import {
 } from "common/game/types";
 import { showDialog } from "components/Game/gamestate";
 import Phaser from "phaser";
+import { gameState } from "signals";
 import { GameScene } from "./GameScene";
 
 type Hexagon = Phaser.GameObjects.Polygon &
@@ -55,18 +56,21 @@ export class Board {
     private scene: GameScene;
     private onMove: (move: Move) => void;
 
-    public fields: Hexagon[][] = [];
+    private fields: Hexagon[][] = [];
 
     public maxQ: number;
     public maxR: number;
     public offsetQ: number;
     public offsetR: number;
 
-    public pieces: BoardPieceObject[] = [];
+    private pieces: BoardPieceObject[] = [];
+    private highlightedPieces: {
+        coordinates: BoardCoordinates;
+        glow: Phaser.FX.Glow;
+    }[] = [];
     public highlightedFields: BoardCoordinates[] = [];
 
     public lockMovement = false;
-    public gameOver = false;
 
     constructor({
         scene,
@@ -116,6 +120,14 @@ export class Board {
         }
     }
 
+    public getBoardPieces() {
+        return this.pieces.map((piece) => ({
+            side: piece.side,
+            piece: piece.piece,
+            coords: { q: piece.q, r: piece.r },
+        }));
+    }
+
     private getField(q: number, r: number) {
         const selR = r + this.offsetR;
         const selQ = q + this.offsetQ + Math.floor(selR / 2);
@@ -130,7 +142,29 @@ export class Board {
         });
     }
 
-    public placePiece(
+    public highlightPiece(coordinates: BoardCoordinates) {
+        const glow = this.pieces
+            .find(
+                (piece) =>
+                    piece.q === coordinates.q && piece.r === coordinates.r,
+            )
+            ?.postFX.addGlow(0xff0000);
+        glow && this.highlightedPieces.push({ coordinates, glow });
+    }
+
+    public resetPieceHighlight() {
+        this.highlightedPieces.forEach((highlight) =>
+            this.pieces
+                .find(
+                    (piece) =>
+                        piece.q === highlight.coordinates.q &&
+                        piece.r === highlight.coordinates.r,
+                )
+                ?.postFX.remove(highlight.glow),
+        );
+    }
+
+    private placePiece(
         piece: Phaser.GameObjects.Components.Transform &
             Phaser.GameObjects.Components.Size &
             BoardCoordinates,
@@ -143,6 +177,16 @@ export class Board {
         piece.r = r;
         piece.x = field.x - field.width / 2;
         piece.y = field.y - field.height / 2;
+    }
+
+    public movePiece(move: Move) {
+        this.placePiece(
+            this.pieces.find(
+                (piece) => piece.q === move.from.q && piece.r === move.from.r,
+            )!,
+            move.to.q,
+            move.to.r,
+        );
     }
 
     public addPiece(
@@ -169,7 +213,8 @@ export class Board {
                     },
                 )
                 .on(Phaser.Input.Events.DRAG_START, () => {
-                    if (this.gameOver) return;
+                    if (gameState.value && "gameState" in gameState.value)
+                        return;
                     this.colorizeHighlightedFields();
                     this.highlightedFields = getLegalMoves(
                         type,
@@ -178,11 +223,8 @@ export class Board {
                             q: piece.q,
                             r: piece.r,
                         },
-                        this.pieces.map((piece) => ({
-                            side: piece.side,
-                            piece: piece.piece,
-                            coords: { q: piece.q, r: piece.r },
-                        })),
+                        this.getBoardPieces(),
+                        { q: this.maxQ, r: this.maxR },
                     );
                     this.colorizeHighlightedFields(0x00ff00);
                 })
@@ -227,14 +269,6 @@ export class Board {
                         this.lockMovement = true;
                         this.colorizeHighlightedFields();
                         this.highlightedFields = [];
-                        const takenPiece = this.pieces.find(
-                            (piece) =>
-                                piece.q === dropZone.q &&
-                                piece.r === dropZone.r,
-                        );
-                        if (takenPiece?.piece === "king") {
-                            this.gameOver = true;
-                        }
                         this.removePiece(dropZone.q, dropZone.r);
                         if (
                             piece.piece == "pawn" &&

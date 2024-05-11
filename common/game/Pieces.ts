@@ -1,9 +1,13 @@
+import { isOnBoard } from "./Board";
+import { maxDiagonal, maxStaight } from "./const";
 import {
     BoardCoordinates,
     BoardPiece,
     BoardSide,
+    Move,
     Piece,
     boardSides,
+    oppositeSide,
     sideFactor,
 } from "./types";
 
@@ -116,6 +120,22 @@ function scaleCheck(
     return legalFields;
 }
 
+export const movePiece = (move: Move, boardPieces: BoardPiece[]) =>
+    boardPieces
+        .filter(
+            (piece) =>
+                !(piece.coords.q === move.to.q && piece.coords.r === move.to.r),
+        )
+        .map((piece) =>
+            piece.coords.q === move.from.q && piece.coords.r === move.from.r
+                ? {
+                      side: piece.side,
+                      coords: move.to,
+                      piece: move.promotion ?? piece.piece,
+                  }
+                : piece,
+        );
+
 const legalMoves: {
     [key in Piece]: (
         coordinates: BoardCoordinates,
@@ -128,13 +148,25 @@ const legalMoves: {
             scaleCheck(coords, side, boardPieces, diagonalDirections, 1),
         ),
     queen: (coords, side, boardPieces) =>
-        scaleCheck(coords, side, boardPieces, straightDirections, 12).concat(
-            scaleCheck(coords, side, boardPieces, diagonalDirections, 8),
+        scaleCheck(
+            coords,
+            side,
+            boardPieces,
+            straightDirections,
+            maxStaight,
+        ).concat(
+            scaleCheck(
+                coords,
+                side,
+                boardPieces,
+                diagonalDirections,
+                maxDiagonal,
+            ),
         ),
     rook: (coords, side, boardPieces) =>
-        scaleCheck(coords, side, boardPieces, straightDirections, 12),
+        scaleCheck(coords, side, boardPieces, straightDirections, maxStaight),
     bishop: (coords, side, boardPieces) =>
-        scaleCheck(coords, side, boardPieces, diagonalDirections, 8),
+        scaleCheck(coords, side, boardPieces, diagonalDirections, maxDiagonal),
     knight: (coords, side, boardPieces) => {
         const targets = [1, -1].flatMap((factor) =>
             knightDirections.map((direction) => ({
@@ -194,9 +226,39 @@ const legalMoves: {
     },
 };
 
-export const getLegalMoves = (
+export const isInCheck = (side: BoardSide, boardPieces: BoardPiece[]) =>
+    boardPieces
+        .filter((piece) => piece.side === oppositeSide[side])
+        .flatMap((piece) =>
+            getAllMoves(piece.piece, piece.side, piece.coords, boardPieces),
+        )
+        .some(
+            (move) =>
+                boardPieces.find(
+                    (piece) =>
+                        piece.coords.q === move.q && piece.coords.r === move.r,
+                )?.piece === "king",
+        );
+
+export const getAllMoves = (
     piece: Piece,
     side: BoardSide,
     coordinates: BoardCoordinates,
     boardPieces: BoardPiece[],
 ) => legalMoves[piece](coordinates, side, boardPieces);
+
+export const getLegalMoves = (
+    piece: Piece,
+    side: BoardSide,
+    coordinates: BoardCoordinates,
+    boardPieces: BoardPiece[],
+    boardSize: BoardCoordinates,
+) =>
+    getAllMoves(piece, side, coordinates, boardPieces).filter(
+        (move) =>
+            isOnBoard(move, boardSize) &&
+            !isInCheck(
+                side,
+                movePiece({ from: coordinates, to: move }, boardPieces),
+            ),
+    );

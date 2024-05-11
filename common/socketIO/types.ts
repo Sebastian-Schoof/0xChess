@@ -8,7 +8,7 @@ export type ServerSocketMessage = {
         toMove: BoardSide;
     };
 } & { friendCode: string } & MoveMessage & {
-        gameStatus: "won" | "lost" | "opponent quit";
+        gameStatus: "won" | "lost" | "drew" | "opponent quit";
     };
 
 export type ClientSocketMessage = { identity: string } & {
