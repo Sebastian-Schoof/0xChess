@@ -13,11 +13,12 @@ note however, that you need to host the frontend if you want to play in your loc
 
 ## what's next for this project?
 
--   [ ] enable restraining diagonal movement
+-   [ ] add tutorial / move info
 -   [ ] enable mirrored starting positions
 -   [ ] enable randomised starting positions
 -   [ ] enable WeGo mechanic
 -   [ ] enable clock games
+-   [ ] enable more boards
 -   [ ] enable concurrent games (maybe even accounts)
 -   [ ] make socket protocol more robust
 
@@ -29,3 +30,5 @@ if the technical side of this project tickles your fancy, here are some things I
     -   the subscriptions would have probably played nicer with phaser
     -   would have lead to less duplications of state in phaser vs preact
 -   having "type safe" sockets might not be worth having an unholy wrapper for client and server sockets
+-   phasers (stateful) object based approach to rendering is not my cup of tea
+    -   turns out, I prefer libraries like raylib, LÖVE 2D, libGDX or MonoGame (maybe even in that order)
