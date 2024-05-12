@@ -302,7 +302,7 @@ export class Board {
                 )
                 .on(
                     Phaser.Input.Events.DRAG_LEAVE,
-                    (_: Phaser.Input.Pointer, hexagon: Hexagon) => {
+                    (_: Phaser.Input.Pointer) => {
                         if (this.dragState?.hoveredFieldLayer) {
                             this.removeHighlightedFields(
                                 this.dragState.hoveredFieldLayer,
