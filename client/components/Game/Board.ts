@@ -11,6 +11,7 @@ import { showDialog } from "components/Game/gamestate";
 import Phaser from "phaser";
 import { gameState } from "signals";
 import { GameScene } from "./GameScene";
+import { themes } from "./colors";
 
 type Hexagon = Phaser.GameObjects.Polygon &
     BoardCoordinates & { defaultColor: number };
@@ -56,6 +57,7 @@ export class Board {
     private scene: GameScene;
     private onMove: (move: Move) => void;
 
+    private pieces: BoardPieceObject[] = [];
     private fields: Hexagon[][] = [];
 
     public maxQ: number;
@@ -63,13 +65,20 @@ export class Board {
     public offsetQ: number;
     public offsetR: number;
 
-    private pieces: BoardPieceObject[] = [];
     private highlightedPieces: {
         coordinates: BoardCoordinates;
         glow: Phaser.FX.Glow;
     }[] = [];
-    public highlightedFields: BoardCoordinates[] = [];
+    public highlightedFields: ({
+        color: number;
+        coordinates: BoardCoordinates[];
+    } | null)[] = [];
 
+    private dragState: {
+        legalDropCoordinates: BoardCoordinates[];
+        allowedFieldsLayer: number;
+        hoveredFieldLayer?: number;
+    } | null = null;
     public lockMovement = false;
 
     constructor({
@@ -107,14 +116,12 @@ export class Board {
                     size: tileSize,
                     x: x + offsetX,
                     y: y + offsetY,
-                    color: [0xd18b47, 0xeeaa66, 0xffcc99][
-                        (q - (r % 2) + 3) % 3
-                    ]!,
+                    color: themes["default"].board[(q - (r % 2) + 3) % 3]!,
                     q: qAxial - this.offsetQ,
                     r: r - this.offsetR,
                 });
                 hexagon.isStroked = true;
-                hexagon.strokeColor = 0x000000;
+                hexagon.strokeColor = themes["default"].stroke;
                 this.fields[r]?.push(hexagon);
             }
         }
@@ -134,12 +141,45 @@ export class Board {
         return this.fields[selR]?.[selQ];
     }
 
-    public colorizeHighlightedFields(color?: number) {
-        this.highlightedFields.forEach(({ q, r }) => {
-            const field = this.getField(q, r);
-            if (!field) return;
-            field.fillColor = color ?? field.defaultColor;
-        });
+    private updateFieldColors() {
+        this.fields.forEach((fields) =>
+            fields.forEach((field) => (field.fillColor = field.defaultColor)),
+        );
+        this.highlightedFields.forEach((highlight) =>
+            highlight?.coordinates.forEach(({ q, r }) => {
+                const field = this.getField(q, r);
+                if (!field) return;
+                field.fillColor = highlight.color;
+            }),
+        );
+    }
+
+    public setHighlightedFields(
+        color: number,
+        coordinates: BoardCoordinates[],
+    ) {
+        this.highlightedFields = [{ color, coordinates }];
+        this.updateFieldColors();
+        return this.highlightedFields.length - 1;
+    }
+
+    public addHighlightedFields(
+        color: number,
+        coordinates: BoardCoordinates[],
+    ) {
+        this.highlightedFields.push({ color, coordinates });
+        this.updateFieldColors();
+        return this.highlightedFields.length - 1;
+    }
+
+    public removeHighlightedFields(stage: number) {
+        this.highlightedFields[stage] = null;
+        this.updateFieldColors();
+    }
+
+    public clearHighlightedFields() {
+        this.highlightedFields = [];
+        this.updateFieldColors();
     }
 
     public highlightPiece(coordinates: BoardCoordinates) {
@@ -148,11 +188,11 @@ export class Board {
                 (piece) =>
                     piece.q === coordinates.q && piece.r === coordinates.r,
             )
-            ?.postFX.addGlow(0xff0000);
-        glow && this.highlightedPieces.push({ coordinates, glow });
+            ?.postFX.addGlow(themes["default"].highlights.check, 10);
+        if (glow) this.highlightedPieces.push({ coordinates, glow });
     }
 
-    public resetPieceHighlight() {
+    public clearPieceHighlight() {
         this.highlightedPieces.forEach((highlight) =>
             this.pieces
                 .find(
@@ -215,8 +255,7 @@ export class Board {
                 .on(Phaser.Input.Events.DRAG_START, () => {
                     if (gameState.value && "gameState" in gameState.value)
                         return;
-                    this.colorizeHighlightedFields();
-                    this.highlightedFields = getLegalMoves(
+                    const legalMoves = getLegalMoves(
                         type,
                         side,
                         {
@@ -226,49 +265,73 @@ export class Board {
                         this.getBoardPieces(),
                         { q: this.maxQ, r: this.maxR },
                     );
-                    this.colorizeHighlightedFields(0x00ff00);
+                    const highlightedLayer = this.setHighlightedFields(
+                        themes["default"].highlights.possibleMoves,
+                        legalMoves,
+                    );
+                    this.dragState = {
+                        legalDropCoordinates: legalMoves,
+                        allowedFieldsLayer: highlightedLayer,
+                    };
                 })
                 .on(Phaser.Input.Events.DRAG_END, () => {
-                    this.colorizeHighlightedFields();
-                    this.highlightedFields = [];
+                    this.clearHighlightedFields();
                     this.placePiece(piece, piece.q, piece.r);
                 })
                 .on(
                     Phaser.Input.Events.DRAG_ENTER,
                     (_: Phaser.Input.Pointer, hexagon: Hexagon) => {
-                        if (piece.q !== hexagon.q || piece.r !== hexagon.r)
-                            hexagon.fillColor = 0x757575;
+                        if (
+                            this.dragState &&
+                            (piece.q !== hexagon.q || piece.r !== hexagon.r) &&
+                            this.dragState.legalDropCoordinates.some(
+                                (coordinate) =>
+                                    coordinate.q === hexagon.q &&
+                                    coordinate.r === hexagon.r,
+                            )
+                        ) {
+                            const newHightlightLayer =
+                                this.addHighlightedFields(
+                                    themes["default"].highlights.moveTarget,
+                                    [hexagon],
+                                );
+                            this.dragState.hoveredFieldLayer =
+                                newHightlightLayer;
+                        }
                     },
                 )
                 .on(
                     Phaser.Input.Events.DRAG_LEAVE,
                     (_: Phaser.Input.Pointer, hexagon: Hexagon) => {
-                        hexagon.fillColor = this.highlightedFields.some(
-                            (field) =>
-                                field.q === hexagon.q && field.r === hexagon.r,
-                        )
-                            ? 0x00ff00
-                            : hexagon.defaultColor;
-                        hexagon.fillAlpha = 1;
+                        if (this.dragState?.hoveredFieldLayer) {
+                            this.removeHighlightedFields(
+                                this.dragState.hoveredFieldLayer,
+                            );
+                            this.dragState.hoveredFieldLayer = undefined;
+                        }
                     },
                 )
                 .on(
                     Phaser.Input.Events.DROP,
                     (_: Phaser.Input.Pointer, dropZone: Hexagon) => {
-                        dropZone.fillColor = dropZone.defaultColor;
-                        dropZone.fillAlpha = 1;
                         if (
                             this.lockMovement ||
-                            !this.highlightedFields.some(
+                            !this.dragState?.legalDropCoordinates.some(
                                 (coord) =>
                                     coord.q === dropZone.q &&
                                     coord.r === dropZone.r,
                             )
-                        )
+                        ) {
+                            if (this.dragState?.allowedFieldsLayer)
+                                this.removeHighlightedFields(
+                                    this.dragState.allowedFieldsLayer,
+                                );
+                            this.dragState = null;
                             return;
+                        }
+                        this.clearHighlightedFields();
+                        this.dragState = null;
                         this.lockMovement = true;
-                        this.colorizeHighlightedFields();
-                        this.highlightedFields = [];
                         this.removePiece(dropZone.q, dropZone.r);
                         if (
                             piece.piece == "pawn" &&
@@ -327,8 +390,8 @@ export class Board {
     }
 
     public clear() {
-        this.colorizeHighlightedFields();
-        this.highlightedFields = [];
+        this.clearHighlightedFields();
+        this.clearPieceHighlight();
         this.pieces.forEach((piece) => this.removePiece(piece.q, piece.r));
     }
 }

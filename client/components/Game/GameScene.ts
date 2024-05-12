@@ -11,6 +11,7 @@ import { assetName, piecePaths } from "components/Game/assets";
 import Phaser from "phaser";
 import { gameState, sceneInitiated, socket } from "signals";
 import { Board } from "./Board";
+import { themes } from "./colors";
 
 export class GameScene extends Phaser.Scene {
     private side?: BoardSide;
@@ -61,7 +62,7 @@ export class GameScene extends Phaser.Scene {
             offsetY: 160,
             onMove: (move) => {
                 socket.value?.sendMessage({ move: move });
-                board.resetPieceHighlight();
+                board.clearPieceHighlight();
                 highlightChecks();
                 gameState.value = {
                     side: this.side!,
@@ -79,7 +80,7 @@ export class GameScene extends Phaser.Scene {
                             (piece) =>
                                 piece.side === side && piece.piece === "king",
                         )?.coords;
-                    kingCoordinates && board.highlightPiece(kingCoordinates);
+                    if (kingCoordinates) board.highlightPiece(kingCoordinates);
                 }
             });
 
@@ -102,8 +103,10 @@ export class GameScene extends Phaser.Scene {
         });
         socket.value?.addMessageHandler("move", (data) => {
             board.removePiece(data.to.q, data.to.r);
-            board.highlightedFields = [data.from, data.to];
-            board.colorizeHighlightedFields(0x00ff00);
+            board.addHighlightedFields(
+                themes["default"].highlights.moveTarget,
+                [data.from, data.to],
+            );
             if (data.promotion) {
                 board.removePiece(data.from.q, data.from.r);
                 const newPiece = this.loadPiece(
