@@ -378,6 +378,36 @@ export class Board {
                     },
                 );
             this.scene.input.setDraggable(piece);
+        } else {
+            piece.on(Phaser.Input.Events.POINTER_DOWN, () => {
+                const movesHighlightLayer = this.addHighlightedFields(
+                    themes["default"].highlights.possibleMoves,
+                    getLegalMoves(
+                        type,
+                        side,
+                        { q: piece.q, r: piece.r },
+                        this.getBoardPieces(),
+                        { q: this.maxQ, r: this.maxR },
+                    ),
+                );
+                const pointerEvent = () => {
+                    this.removeHighlightedFields(movesHighlightLayer);
+                    this.scene.input.removeListener(
+                        Phaser.Input.Events.POINTER_UP,
+                    );
+                    this.scene.input.removeListener(
+                        Phaser.Input.Events.POINTER_UP_OUTSIDE,
+                    );
+                };
+                this.scene.input.addListener(
+                    Phaser.Input.Events.POINTER_UP,
+                    pointerEvent,
+                );
+                this.scene.input.addListener(
+                    Phaser.Input.Events.POINTER_UP_OUTSIDE,
+                    pointerEvent,
+                );
+            });
         }
         this.placePiece(piece, q, r);
     }
