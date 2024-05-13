@@ -1,10 +1,8 @@
-import { isInCheck } from "common/game/Pieces";
 import { boardSize } from "common/game/const";
 import {
     BoardPieceObject,
     BoardSide,
     Piece,
-    boardSides,
     oppositeSide,
 } from "common/game/types";
 import { assetName, piecePaths } from "components/Game/assets";
@@ -62,27 +60,12 @@ export class GameScene extends Phaser.Scene {
             offsetY: 160,
             onMove: (move) => {
                 socket.value?.sendMessage({ move: move });
-                board.clearPieceHighlight();
-                highlightChecks();
                 gameState.value = {
                     side: this.side!,
                     toMove: oppositeSide[this.side!],
                 };
             },
         });
-
-        const highlightChecks = () =>
-            boardSides.forEach((side) => {
-                if (isInCheck(side, board.getBoardPieces())) {
-                    const kingCoordinates = board
-                        .getBoardPieces()
-                        .find(
-                            (piece) =>
-                                piece.side === side && piece.piece === "king",
-                        )?.coords;
-                    if (kingCoordinates) board.highlightPiece(kingCoordinates);
-                }
-            });
 
         socket.value?.addMessageHandler("initialSetup", (data) => {
             this.side = data.side;
@@ -99,7 +82,7 @@ export class GameScene extends Phaser.Scene {
                     coords,
                 );
             });
-            highlightChecks();
+            board.highlightChecks();
         });
         socket.value?.addMessageHandler("move", (data) => {
             board.removePiece(data.to.q, data.to.r);
@@ -123,7 +106,7 @@ export class GameScene extends Phaser.Scene {
             } else {
                 board.movePiece(data);
             }
-            highlightChecks();
+            board.highlightChecks();
             board.lockMovement = false;
             gameState.value = { side: this.side!, toMove: this.side! };
         });

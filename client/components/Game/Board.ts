@@ -1,10 +1,11 @@
-import { getLegalMoves, promotionCoords } from "common/game/Pieces";
+import { getLegalMoves, isInCheck, promotionCoords } from "common/game/Pieces";
 import {
     BoardCoordinates,
     BoardPieceObject,
     BoardSide,
     Move,
     Piece,
+    boardSides,
     sideFactor,
 } from "common/game/types";
 import { showDialog } from "components/Game/gamestate";
@@ -66,7 +67,7 @@ export class Board {
     public offsetR: number;
 
     private highlightedPieces: {
-        coordinates: BoardCoordinates;
+        piece: BoardPieceObject;
         glow: Phaser.FX.Glow;
     }[] = [];
     public highlightedFields: ({
@@ -182,26 +183,34 @@ export class Board {
         this.updateFieldColors();
     }
 
-    public highlightPiece(coordinates: BoardCoordinates) {
-        const glow = this.pieces
-            .find(
-                (piece) =>
-                    piece.q === coordinates.q && piece.r === coordinates.r,
-            )
-            ?.postFX.addGlow(themes["default"].highlights.check, 10);
-        if (glow) this.highlightedPieces.push({ coordinates, glow });
+    private highlightPiece(coordinates: BoardCoordinates) {
+        const piece = this.pieces.find(
+            (piece) => piece.q === coordinates.q && piece.r === coordinates.r,
+        );
+        const glow = piece?.postFX.addGlow(
+            themes["default"].highlights.check,
+            10,
+        );
+        if (piece && glow) this.highlightedPieces.push({ piece, glow });
     }
 
-    public clearPieceHighlight() {
-        this.highlightedPieces.forEach((highlight) =>
-            this.pieces
-                .find(
-                    (piece) =>
-                        piece.q === highlight.coordinates.q &&
-                        piece.r === highlight.coordinates.r,
-                )
-                ?.postFX.remove(highlight.glow),
+    private clearPieceHighlights() {
+        this.highlightedPieces.forEach(({ piece, glow }) =>
+            piece?.postFX.remove(glow),
         );
+        this.highlightedPieces = [];
+    }
+
+    public highlightChecks() {
+        this.clearPieceHighlights();
+        boardSides.forEach((side) => {
+            if (isInCheck(side, this.getBoardPieces())) {
+                const kingCoordinates = this.getBoardPieces().find(
+                    (piece) => piece.side === side && piece.piece === "king",
+                )?.coords;
+                if (kingCoordinates) this.highlightPiece(kingCoordinates);
+            }
+        });
     }
 
     private placePiece(
@@ -375,6 +384,7 @@ export class Board {
                             });
                             this.placePiece(piece, dropZone.q, dropZone.r);
                         }
+                        this.highlightChecks();
                     },
                 );
             this.scene.input.setDraggable(piece);
@@ -421,7 +431,7 @@ export class Board {
 
     public clear() {
         this.clearHighlightedFields();
-        this.clearPieceHighlight();
+        this.clearPieceHighlights();
         this.pieces.forEach((piece) => this.removePiece(piece.q, piece.r));
     }
 }
