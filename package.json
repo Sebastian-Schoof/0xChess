@@ -3,9 +3,9 @@
     "private": true,
     "version": "0.1.0",
     "scripts": {
-        "client:start": "bunx --bun vite -c client/vite.config.ts",
-        "client:build": "bunx --bun tsc --project client/tsconfig.json && bunx --bun vite build -c client/vite.config.ts",
-        "client:preview": "bunx --bun vite preview -c client/vite.config.ts",
+        "client:start": "bun x --bun vite -c client/vite.config.ts",
+        "client:build": "bun x --bun tsc --project client/tsconfig.json && bun x --bun vite build -c client/vite.config.ts",
+        "client:preview": "bun x --bun vite preview -c client/vite.config.ts",
         "server:start": "bun --bun --hot server/main.ts",
         "server:build": "bun --bun build server/main.ts --outdir ./build --target=bun --minify-whitespace --minify-identifiers --minify-syntax && mv ./build/main.js ./build/server.js",
         "start": "concurrently 'bun:client:start' 'bun:server:start'",
