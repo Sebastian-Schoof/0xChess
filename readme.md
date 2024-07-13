@@ -14,11 +14,13 @@ note however, that you need to host the frontend if you want to play in your loc
 ## what's next for this project?
 
 -   [ ] add tutorial / move info
+-   [ ] add itch.io build
 -   [ ] enable mirrored starting positions
 -   [ ] enable randomised starting positions
 -   [ ] enable WeGo mechanic
 -   [ ] enable clock games
 -   [ ] enable more boards
+-   [ ] enable more color themes
 -   [ ] enable concurrent games (maybe even accounts)
 -   [ ] make socket protocol more robust
 
