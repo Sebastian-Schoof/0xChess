@@ -127,14 +127,14 @@ export function openServerSocket(
                   ),
               });
               const wss = new WS.Server({
-                  port: server ? undefined : +process.env.PORT! || defaultPort,
+                  port: server ? undefined : +process.env.VITE_PORT! || defaultPort,
                   server,
               });
-              server.listen(+process.env.PORT! || defaultPort);
+              server.listen(+process.env.VITE_PORT! || defaultPort);
               return wss;
           })()
         : new WS.Server({
-              port: +process.env.PORT! || defaultPort,
+              port: +process.env.VITE_PORT! || defaultPort,
           });
 
     wss.on("connection", (ws) =>
@@ -148,7 +148,7 @@ export const openClientSocket = (onOpen: () => void) =>
     new Socket({
         type: "client",
         address: `${window.location.protocol === "https:" ? "wss" : "ws"}://${
-            window.location.hostname
-        }:${process.env.PORT ?? defaultPort}`,
+           import.meta.env.VITE_HOST ?? window.location.hostname
+        }:${import.meta.env.VITE_PORT ?? defaultPort}`,
         onOpen,
     }) as ClientSocket;
