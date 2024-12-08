@@ -42,7 +42,7 @@ export default function Lobby({
                             });
                         }}
                     >
-                        play random
+                        play stranger
                     </div>
                 </>
             )}
@@ -64,7 +64,7 @@ function FriendCode({
         <>
             {friendCode ? (
                 <>
-                    <div>your code is:</div>
+                    <div>your friend code is:</div>
                     <strong className={styles.friendCode}>{friendCode}</strong>
                     <div
                         className={componentStyles.button}
@@ -95,6 +95,7 @@ function FriendCode({
                     >
                         create new game
                     </div>
+                    <hr className={styles.separator}/>
                     <div className={styles.joinArea}>
                         <input
                             className={componentStyles.input}
