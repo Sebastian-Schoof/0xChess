@@ -13,20 +13,13 @@ note however, that you need to host the frontend if you want to play in your loc
 
 ## what's next for this project?
 
--   [ ] add tutorial / move info
--   [ ] enable mirrored starting positions
--   [ ] enable randomised starting positions
--   [ ] enable WeGo mechanic
--   [ ] enable clock games
--   [ ] enable different boards
--   [ ] enable different color themes
--   [ ] enable concurrent games (maybe even accounts)
--   [ ] make socket protocol more robust
+-   [ ] declarative deployment
 
 ## technical remarks
 
 if the technical side of this project tickles your fancy, here are some things I should have done differently:
 
+-   don't have a single package.json for frontend and backend
 -   use zustand instead of shoving preacts signals around
     -   the subscriptions would have probably played nicer with phaser
     -   would have lead to less duplications of state in phaser vs preact
