@@ -3,33 +3,35 @@
     "private": true,
     "version": "0.1.0",
     "scripts": {
-        "client:start": "bun x --bun vite -c client/vite.config.ts",
-        "client:build": "bun x --bun tsc --project client/tsconfig.json && bun x --bun vite build -c client/vite.config.ts",
-        "client:build-embed": "bun x --bun tsc --project client/tsconfig.json && bun x --bun vite build --mode embed -c client/vite.config.ts",
-        "client:preview": "bun x --bun vite preview -c client/vite.config.ts",
-        "server:start": "bun --bun --hot server/main.ts",
-        "server:build": "bun --bun build server/main.ts --outdir ./build --target=bun --minify-whitespace --minify-identifiers --minify-syntax && mv ./build/main.js ./build/server.js",
-        "start": "concurrently 'bun:client:start' 'bun:server:start'",
-        "build": "concurrently 'bun:client:build' 'bun:server:build'",
-        "initDB": "touch games.db && bun run server/db/scripts/execute.ts"
+        "client:start": "vite --config client/vite.config.ts",
+        "client:build": "tsc --project client/tsconfig.json && vite build --config client/vite.config.ts",
+        "client:build-embed": "tsc --project client/tsconfig.json && vite build --mode embed --config client/vite.config.ts",
+        "client:preview": "vite preview --config client/vite.config.ts",
+        "server:start": "tsx watch --tsconfig server/tsconfig.json server/main.ts",
+        "server:build": "esbuild server/main.ts --bundle --packages=external --platform=node --target=node24 --minify --outfile=build/server.js",
+        "start": "concurrently \"npm run client:start\" \"npm run server:start\"",
+        "build": "concurrently \"npm run client:build\" \"npm run server:build\"",
+        "initDB": "tsx --tsconfig server/tsconfig.json server/db/scripts/execute.ts"
     },
     "dependencies": {
-        "@preact/signals": "^1.1.3",
-        "phaser": "^3.60.0",
-        "preact": "^10.13.1",
-        "ws": "^8.13.0"
+        "@preact/signals": "^2.9.4",
+        "better-sqlite3": "^12.11.1",
+        "phaser": "^4.2.1",
+        "preact": "^10.29.7",
+        "ws": "^8.21.1"
     },
     "devDependencies": {
-        "@preact/preset-vite": "^2.5.0",
-        "@types/bun": "^1.0.8",
-        "@types/ws": "^8.5.4",
-        "concurrently": "^8.0.1",
-        "prettier": "^3.0.3",
-        "sass": "^1.62.1",
-        "tsconfig-paths": "^4.2.0",
-        "typescript": "^5.1.6",
-        "vite": "^4.3.2",
-        "vite-plugin-environment": "^1.1.3",
-        "vite-tsconfig-paths": "^4.2.0"
+        "@preact/preset-vite": "^2.10.5",
+        "@types/better-sqlite3": "^7.6.13",
+        "@types/node": "^26.1.1",
+        "@types/ws": "^8.18.1",
+        "concurrently": "^10.0.3",
+        "esbuild": "^0.28.1",
+        "npm-check-updates": "^22.2.9",
+        "prettier": "^3.9.5",
+        "sass": "^1.101.0",
+        "tsx": "^4.23.1",
+        "typescript": "^7.0.2",
+        "vite": "^8.1.4"
     }
 }

@@ -22,9 +22,11 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
 
-        "baseUrl": ".",
         "paths": {
-            "common/*": ["../common/*"]
+            "common/*": ["./../common/*"],
+            "components/*": ["./components/*"],
+            "signals": ["./signals"],
+            "socket": ["./socket"]
         }
     }
 }

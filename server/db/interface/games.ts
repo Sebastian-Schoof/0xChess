@@ -7,26 +7,26 @@ const createGameQueryStatements = [
     "insert into gameUsers values ($id, $black, 1);",
 ].map((statement) => db.prepare(statement));
 type CreateGameQueryParams = {
-    $id: string;
-    $boardState: Buffer;
-    $toMove: number;
-    $white: string;
-    $black: string;
+    id: string;
+    boardState: Buffer;
+    toMove: number;
+    white: string;
+    black: string;
 };
 const createGameQueryTransaction = db.transaction(
     (gameDetails: CreateGameQueryParams) => {
         createGameQueryStatements[0].run({
-            $id: gameDetails.$id,
-            $boardState: gameDetails.$boardState,
-            $toMove: gameDetails.$boardState,
+            id: gameDetails.id,
+            boardState: gameDetails.boardState,
+            toMove: gameDetails.toMove,
         });
         createGameQueryStatements[1].run({
-            $id: gameDetails.$id,
-            $white: gameDetails.$white,
+            id: gameDetails.id,
+            white: gameDetails.white,
         });
         createGameQueryStatements[2].run({
-            $id: gameDetails.$id,
-            $black: gameDetails.$black,
+            id: gameDetails.id,
+            black: gameDetails.black,
         });
     },
 );
@@ -50,7 +50,7 @@ const getGameByUserIdQuery = db.prepare(`
         )
     );
 `);
-type GetGameByUserIdQueryParams = { $userId: string };
+type GetGameByUserIdQueryParams = { userId: string };
 type GetGameByUserIdQueryReturnGameColumn = {
     gameId: string;
     boardState: Uint8Array;
@@ -79,13 +79,13 @@ const updateGameQuery = db.prepare(`
     where
         id = $gameId;
 `);
-type UpdateGameQueryParams = { $gameId: string; $boardState: Uint8Array };
+type UpdateGameQueryParams = { gameId: string; boardState: Uint8Array };
 
 const endGameQueryStatements = [
     "delete from gameUsers where gameId = $gameId;",
     "delete from games where id = $gameId;",
 ].map((statement) => db.prepare(statement));
-type EndGameQueryParams = { $gameId: string };
+type EndGameQueryParams = { gameId: string };
 const endGameQueryTransaction = db.transaction(
     (gameDetails: EndGameQueryParams) =>
         endGameQueryStatements.forEach((statement) =>
@@ -106,16 +106,16 @@ export function createGame(
     },
 ) {
     createGameQueryTransaction({
-        $id: id,
-        $boardState: Buffer.from(JSON.stringify(game.state.pieces)),
-        $toMove: game.state.toMove === "white" ? 0 : 1,
-        $white: game.connections.white.userId,
-        $black: game.connections.black.userId,
+        id,
+        boardState: Buffer.from(JSON.stringify(game.state.pieces)),
+        toMove: game.state.toMove === "white" ? 0 : 1,
+        white: game.connections.white.userId,
+        black: game.connections.black.userId,
     });
 }
 
 export function getGameByUserId(userId: string) {
-    const params: GetGameByUserIdQueryParams = { $userId: userId };
+    const params: GetGameByUserIdQueryParams = { userId };
     const dbValues = getGameByUserIdQuery.all(
         params,
     ) as GetGameByUserIdQueryReturn;
@@ -146,12 +146,12 @@ export function getGameByUserId(userId: string) {
 
 export function updateGame(gameId: string, boardState: BoardPiece[]) {
     const params: UpdateGameQueryParams = {
-        $gameId: gameId,
-        $boardState: blobEncoder.encode(JSON.stringify(boardState)),
+        gameId,
+        boardState: blobEncoder.encode(JSON.stringify(boardState)),
     };
     updateGameQuery.run(params);
 }
 
 export function endGame(gameId: string) {
-    endGameQueryTransaction({ $gameId: gameId });
+    endGameQueryTransaction({ gameId });
 }

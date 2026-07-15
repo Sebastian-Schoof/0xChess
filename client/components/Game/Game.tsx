@@ -1,3 +1,4 @@
+import Phaser from "phaser";
 import { useEffect, useRef } from "preact/hooks";
 import { GameScene } from "./GameScene";
 import { PromotionDialog } from "./PromotionDialog";

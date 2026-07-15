@@ -68,7 +68,7 @@ export class Board {
 
     private highlightedPieces: {
         piece: BoardPieceObject;
-        glow: Phaser.FX.Glow;
+        glow: Phaser.Filters.Glow;
     }[] = [];
     public highlightedFields: ({
         color: number;
@@ -187,7 +187,7 @@ export class Board {
         const piece = this.pieces.find(
             (piece) => piece.q === coordinates.q && piece.r === coordinates.r,
         );
-        const glow = piece?.postFX.addGlow(
+        const glow = piece?.filters?.internal.addGlow(
             themes["default"].highlights.check,
             10,
         );
@@ -196,7 +196,7 @@ export class Board {
 
     private clearPieceHighlights() {
         this.highlightedPieces.forEach(({ piece, glow }) =>
-            piece?.postFX.remove(glow),
+            piece.filters?.internal.remove(glow),
         );
         this.highlightedPieces = [];
     }

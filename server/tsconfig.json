@@ -13,11 +13,12 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
 
-        "baseUrl": ".",
         "paths": {
-            "common/*": ["../common/*"],
-            "db/*": ["db/*"]
+            "common/*": ["./../common/*"],
+            "db/*": ["./db/*"],
+            "state/*": ["./state/*"]
         },
+        "rootDir": "..",
         "outDir": "../build"
     },
 

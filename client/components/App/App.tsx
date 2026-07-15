@@ -1,5 +1,5 @@
 import { repositoryURL } from "common/socketIO/const";
-import { openClientSocket } from "common/socketIO/socket";
+import { openClientSocket } from "socket";
 import Game from "components/Game";
 import Lobby from "components/Lobby";
 import Message from "components/Message";
@@ -29,7 +29,7 @@ export default function App() {
     const [gameRunning, setGameRunning] = useState(false);
     const [waitingForLobby, setWaitingForLobby] = useState(false);
     const docTitleRot = useRef<number>(0);
-    const titleInterval = useRef<Timer>();
+    const titleInterval = useRef<ReturnType<typeof setInterval>>();
 
     useEffect(() => {
         document.addEventListener("visibilitychange", () => {

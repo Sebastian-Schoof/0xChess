@@ -22,7 +22,7 @@
 }
 .separator::after {
     background: white;
-    content: 'or';
+    content: "or";
     padding: 0 8px;
     position: relative;
     top: -18px;

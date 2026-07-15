@@ -1,5 +1,4 @@
-import { WebSocket as WS } from "ws";
-import { defaultPort } from "./const";
+import type { WebSocket as WS } from "ws";
 import { ClientSocketMessage, ServerSocketMessage } from "./types";
 
 type SocketMessage = ClientSocketMessage | ServerSocketMessage;
@@ -7,7 +6,7 @@ type CallBacks<T extends SocketMessage> = Partial<{
     [key in keyof T]: ((data: T[key]) => void)[];
 }>;
 
-class Socket<
+export class Socket<
     OutMessage extends SocketMessage,
     InMessage extends SocketMessage,
 > {
@@ -110,45 +109,4 @@ class Socket<
 }
 export type ServerSocket = Socket<ServerSocketMessage, ClientSocketMessage>;
 
-export function openServerSocket(
-    onConnect: (ws: Socket<ServerSocketMessage, ClientSocketMessage>) => void,
-) {
-    const wss = process.env.certFolder
-        ? (() => {
-              const { readFileSync } = require("fs");
-              const { createServer } = require("https");
-              const { join } = require("path");
-              const server = createServer({
-                  cert: readFileSync(
-                      join(process.env.certFolder, "fullchain.pem"),
-                  ),
-                  key: readFileSync(
-                      join(process.env.certFolder, "privkey.pem"),
-                  ),
-              });
-              const wss = new WS.Server({
-                  port: server ? undefined : +process.env.VITE_PORT! || defaultPort,
-                  server,
-              });
-              server.listen(+process.env.VITE_PORT! || defaultPort);
-              return wss;
-          })()
-        : new WS.Server({
-              port: +process.env.VITE_PORT! || defaultPort,
-          });
-
-    wss.on("connection", (ws) =>
-        onConnect(new Socket({ type: "server", connection: ws })),
-    );
-}
-
 export type ClientSocket = Socket<ClientSocketMessage, ServerSocketMessage>;
-
-export const openClientSocket = (onOpen: () => void) =>
-    new Socket({
-        type: "client",
-        address: `${window.location.protocol === "https:" ? "wss" : "ws"}://${
-           import.meta.env.VITE_HOST ?? window.location.hostname
-        }:${import.meta.env.VITE_PORT ?? defaultPort}`,
-        onOpen,
-    }) as ClientSocket;

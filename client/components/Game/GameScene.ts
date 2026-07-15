@@ -45,6 +45,7 @@ export class GameScene extends Phaser.Scene {
             0,
             assetName(side, piece),
         ) as BoardPieceObject;
+        newPiece.enableFilters();
         newPiece.setInteractive();
         this.input.setDraggable(newPiece);
         return newPiece;

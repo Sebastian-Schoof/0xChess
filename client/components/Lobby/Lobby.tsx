@@ -1,5 +1,5 @@
 import { styles as componentStyles } from "components/general";
-import { StateUpdater, useRef, useState } from "preact/hooks";
+import { type Dispatch, useRef, useState } from "preact/hooks";
 import { socket } from "signals";
 import styles from "./styles.module.css";
 import BackButton from "/assets/back.svg";
@@ -7,7 +7,7 @@ import BackButton from "/assets/back.svg";
 export default function Lobby({
     setKeepOpen,
 }: {
-    setKeepOpen: StateUpdater<boolean>;
+    setKeepOpen: Dispatch<boolean>;
 }) {
     const [askFriendCode, setAskFriendCode] = useState(false);
 
@@ -95,7 +95,7 @@ function FriendCode({
                     >
                         create new game
                     </div>
-                    <hr className={styles.separator}/>
+                    <hr className={styles.separator} />
                     <div className={styles.joinArea}>
                         <input
                             className={componentStyles.input}

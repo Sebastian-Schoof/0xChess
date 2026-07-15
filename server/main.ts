@@ -1,4 +1,4 @@
-import { openServerSocket } from "common/socketIO/socket";
+import { openServerSocket } from "./socket";
 import { ServerState } from "state/serverState";
 import { SessionStateManager } from "state/sessionStateManager";
 
